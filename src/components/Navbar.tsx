@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Navbar() {
   const router = useRouter();
@@ -22,13 +21,10 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <Image 
-              src="/images/logo.png" 
-              alt="RailJee Logo" 
-              width={200}
-              height={140}
+            <img
+              src="/images/logo.png"
+              alt="RailJee Logo"
               className="h-16 sm:h-16 w-auto transition-transform group-hover:scale-105"
-              priority
             />
           </Link>
           

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface Department {
   id: string;
@@ -144,13 +143,10 @@ export default function DepartmentsPage() {
               </div>
             </Link>
             <Link href="/" className="transition-transform hover:scale-105">
-              <Image 
-                src="/images/logo.png" 
-                alt="RailJee Logo" 
-                width={200}
-                height={160}
+              <img
+                src="/images/logo.png"
+                alt="RailJee Logo"
                 className="h-10 sm:h-12 w-auto"
-                priority
               />
             </Link>
           </div>
