@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // Removed output: "export" to enable API routes
+  // API routes require a Node.js server and cannot work with static export
   images: {
-    // Required when using `output: "export"` so that `next/image`
-    // does not rely on the missing `/_next/image` optimization route.
     unoptimized: true,
   },
 };

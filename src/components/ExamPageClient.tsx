@@ -1,9 +1,13 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import examData from '@/data/exams.json';
+import { useState, useEffect, useRef } from 'react';
 import { saveExamAttempt, getExamAttemptCount, getBestScore } from '@/lib/examStorage';
+import ExamInstructions from './exam/ExamInstructions';
+import ExamQuestion from './exam/ExamQuestion';
+import QuestionPalette from './exam/QuestionPalette';
+import ExamResult from './exam/ExamResult';
+import SubmitConfirmation from './exam/SubmitConfirmation';
 
 interface Question {
   id: number;
@@ -25,8 +29,11 @@ interface Exam {
   duration: number;
   totalQuestions: number;
   passingMarks: number;
+  passingPercentage?: number;
+  negativeMarking?: number;
+  instructions?: string[];
+  studentsAttempted?: number;
 }
-
 
 interface ExamPageClientProps {
   examId: string;
@@ -51,18 +58,85 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   const [markedForReview, setMarkedForReview] = useState<boolean[]>([]);
   const [visitedQuestions, setVisitedQuestions] = useState<Set<number>>(new Set());
   const [showQuestionReview, setShowQuestionReview] = useState(false);
+  
+  // API state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
+  const [questionsPrefetched, setQuestionsPrefetched] = useState(false);
+  const questionsCache = useRef<Question[]>([]);
+  
+  // Result state from API
+  const [submissionResult, setSubmissionResult] = useState<{
+    score: number;
+    percentage: number;
+    passed: boolean;
+    correctAnswers: number;
+    wrongAnswers: number;
+    skipped: number;
+  } | null>(null);
 
+  // Fetch exam details and prefetch questions
   useEffect(() => {
-    // Find exam from static data
-    const foundExam = examData.exams.find(e => e.id === examId);
-    if (foundExam) {
-      setExam(foundExam);
-      const examQuestions = (examData.questions as any)[examId] || [];
-      setQuestions(examQuestions);
-      setTimeRemaining(foundExam.duration * 60);
-      setAnswers(new Array(examQuestions.length).fill(null));
-      setMarkedForReview(new Array(examQuestions.length).fill(false));
-    }
+    const fetchExamDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch exam details
+        const examResponse = await fetch(`/api/exams/${examId}`);
+        
+        if (!examResponse.ok) {
+          throw new Error(`Failed to fetch exam details: ${examResponse.statusText}`);
+        }
+        
+        const examResult = await examResponse.json();
+        
+        if (!examResult.success || !examResult.data) {
+          throw new Error(examResult.error?.message || 'Failed to load exam details');
+        }
+        
+        const examData = examResult.data;
+        setExam(examData);
+        setTimeRemaining(examData.duration * 60);
+        
+        // Start prefetching questions in background
+        prefetchQuestions();
+        
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || 'Failed to load exam');
+        console.error('Error fetching exam details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const prefetchQuestions = async () => {
+      try {
+        setQuestionsLoading(true);
+        
+        const questionsResponse = await fetch(`/api/exams/${examId}/questions`);
+        
+        if (!questionsResponse.ok) {
+          throw new Error('Failed to prefetch questions');
+        }
+        
+        const questionsResult = await questionsResponse.json();
+        
+        if (questionsResult.success && questionsResult.data) {
+          questionsCache.current = questionsResult.data.questions;
+          setQuestionsPrefetched(true);
+        }
+      } catch (err) {
+        console.error('Error prefetching questions:', err);
+        // Don't set error here, we'll try again when exam starts
+      } finally {
+        setQuestionsLoading(false);
+      }
+    };
+
+    fetchExamDetails();
   }, [examId]);
 
   useEffect(() => {
@@ -81,9 +155,43 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     return () => clearInterval(timer);
   }, [hasStarted, showResult, timeRemaining]);
 
-  const handleStartExam = () => {
-    setHasStarted(true);
-    setVisitedQuestions(new Set([0])); // Mark first question as visited
+  const handleStartExam = async () => {
+    try {
+      // Use cached questions if available, otherwise fetch now
+      if (questionsPrefetched && questionsCache.current.length > 0) {
+        setQuestions(questionsCache.current);
+        setAnswers(new Array(questionsCache.current.length).fill(null));
+        setMarkedForReview(new Array(questionsCache.current.length).fill(false));
+        setHasStarted(true);
+        setVisitedQuestions(new Set([0])); // Mark first question as visited
+      } else {
+        // Questions weren't prefetched, fetch them now
+        setQuestionsLoading(true);
+        const questionsResponse = await fetch(`/api/exams/${examId}/questions`);
+        
+        if (!questionsResponse.ok) {
+          throw new Error('Failed to load questions');
+        }
+        
+        const questionsResult = await questionsResponse.json();
+        
+        if (questionsResult.success && questionsResult.data) {
+          const questionsData = questionsResult.data.questions;
+          setQuestions(questionsData);
+          setAnswers(new Array(questionsData.length).fill(null));
+          setMarkedForReview(new Array(questionsData.length).fill(false));
+          setHasStarted(true);
+          setVisitedQuestions(new Set([0]));
+        } else {
+          throw new Error('Failed to load questions');
+        }
+        
+        setQuestionsLoading(false);
+      }
+    } catch (err) {
+      setError('Failed to load exam questions. Please try again.');
+      console.error('Error loading questions:', err);
+    }
   };
 
   const handleToggleMarkForReview = () => {
@@ -145,44 +253,68 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newAnswers = [...answers];
     if (selectedAnswer !== null) {
       newAnswers[currentQuestionIndex] = selectedAnswer;
       setAnswers(newAnswers);
     }
     
-    // Calculate results
-    const { score, percentage, passed } = calculateScore();
-    const timeTaken = (exam?.duration || 0) * 60 - timeRemaining;
-    const correctAnswers = newAnswers.filter((answer, index) => 
-      answer !== null && answer === questions[index].correctAnswer
-    ).length;
-    const wrongAnswers = newAnswers.filter((answer, index) => 
-      answer !== null && answer !== questions[index].correctAnswer
-    ).length;
-    const skipped = newAnswers.filter(answer => answer === null).length;
-    
-    // Save attempt to localStorage
-    if (exam) {
-      saveExamAttempt({
-        examId: exam.id,
-        examName: exam.name,
-        date: new Date().toISOString(),
-        score,
-        totalQuestions: questions.length,
-        percentage,
-        timeTaken,
-        passed,
-        correctAnswers,
-        wrongAnswers,
-        skipped,
-        answers: newAnswers,
+    try {
+      // Submit exam to API
+      const timeTaken = (exam?.duration || 0) * 60 - timeRemaining;
+      
+      const submitResponse = await fetch(`/api/exams/${examId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answers: newAnswers,
+          timeTaken,
+        }),
       });
+      
+      if (!submitResponse.ok) {
+        throw new Error('Failed to submit exam');
+      }
+      
+      const submitResult = await submitResponse.json();
+      
+      if (submitResult.success && submitResult.data) {
+        const { score, percentage, passed, correctAnswers, wrongAnswers, skipped } = submitResult.data;
+        
+        // Store submission result
+        setSubmissionResult({ score, percentage, passed, correctAnswers, wrongAnswers, skipped });
+        
+        // Save attempt to localStorage
+        if (exam) {
+          saveExamAttempt({
+            examId: exam.id,
+            examName: exam.name,
+            date: new Date().toISOString(),
+            score,
+            totalQuestions: questions.length,
+            percentage,
+            timeTaken,
+            passed,
+            correctAnswers,
+            wrongAnswers,
+            skipped,
+            answers: newAnswers,
+          });
+        }
+        
+        setShowResult(true);
+        setShowSubmitConfirm(false);
+      } else {
+        throw new Error(submitResult.error?.message || 'Failed to submit exam');
+      }
+    } catch (err) {
+      setError('Failed to submit exam. Please try again.');
+      console.error('Error submitting exam:', err);
+      setShowSubmitConfirm(false);
     }
-    
-    setShowResult(true);
-    setShowSubmitConfirm(false);
   };
 
   const handleSubmitClick = () => {
@@ -276,7 +408,49 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     return { all: questions.length, correct, wrong, skipped };
   };
 
-  if (!exam || questions.length === 0) {
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading exam details...</h2>
+          <p className="text-gray-600">Please wait</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
+          <svg className="w-20 h-20 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Exam</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!exam) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
@@ -297,7 +471,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   const currentQuestion = questions[currentQuestionIndex];
   const answeredCount = answers.filter(a => a !== null).length;
-  const totalQuestions = questions.length;
+  const totalQuestions = exam.totalQuestions;
   const examDuration = exam.duration;
   const examDescription = exam.description;
 
@@ -307,219 +481,60 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   if (!hasStarted) {
     return (
-      <div className="min-h-screen bg-[#faf9f7] flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-stone-100 sticky top-0 z-10">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <button 
-              onClick={() => router.back()}
-              className="p-2 hover:bg-stone-100 rounded-xl transition-colors"
-            >
-              <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div className="flex items-center gap-2">
-              <button className="p-2 hover:bg-stone-100 rounded-xl transition-colors">
-                <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 px-4 py-6 lg:py-8">
-          <div className="max-w-5xl mx-auto">
-            {/* Exam Title Section */}
-            <div className="mb-6 lg:mb-8">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 mb-1">
-                {exam.name}
-              </h1>
-              <p className="text-stone-500 text-sm lg:text-base">
-                {examDescription} • {(Math.random() * 20 + 5).toFixed(1)}k students took this
-              </p>
-            </div>
-
-            {/* Stats Cards - Grid on Large Screens */}
-            <div className="grid lg:grid-cols-2 gap-3 lg:gap-3.5 mb-6 lg:mb-8">
-              {/* Questions */}
-              <div className="flex items-center gap-3 lg:gap-4 bg-white rounded-xl lg:rounded-2xl p-3.5 lg:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-100">
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg lg:text-xl font-bold text-stone-900">{totalQuestions}</div>
-                  <div className="text-xs lg:text-sm text-stone-500">Multiple Choice Questions</div>
-                </div>
-              </div>
-
-              {/* Duration */}
-              <div className="flex items-center gap-3 lg:gap-4 bg-white rounded-xl lg:rounded-2xl p-3.5 lg:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-100">
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg lg:text-xl font-bold text-stone-900">{examDuration} mins</div>
-                  <div className="text-xs lg:text-sm text-stone-500">Total Duration</div>
-                </div>
-              </div>
-
-              {/* Passing Score */}
-              <div className="flex items-center gap-3 lg:gap-4 bg-white rounded-xl lg:rounded-2xl p-3.5 lg:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-100">
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg lg:text-xl font-bold text-stone-900">40%</div>
-                  <div className="text-xs lg:text-sm text-stone-500">For Badge / Passing Score</div>
-                </div>
-              </div>
-
-              {/* Negative Marking */}
-              <div className="flex items-center gap-3 lg:gap-4 bg-white rounded-xl lg:rounded-2xl p-3.5 lg:p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-100">
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg lg:text-xl font-bold text-stone-900">-0.33</div>
-                  <div className="text-xs lg:text-sm text-stone-500">Negative Marking per Wrong Answer</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Attempt History - Show only if user has attempted before */}
-            {attemptCount > 0 && (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 lg:p-6 border border-amber-100 mb-6 lg:mb-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <h2 className="text-lg font-bold text-amber-900">Your Attempt History</h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-white/60 backdrop-blur rounded-xl p-4">
-                    <p className="text-xs text-amber-700 mb-1">Total Attempts</p>
-                    <p className="text-2xl font-bold text-amber-900">{attemptCount}</p>
-                  </div>
-                  {bestScore && (
-                    <>
-                      <div className="bg-white/60 backdrop-blur rounded-xl p-4">
-                        <p className="text-xs text-amber-700 mb-1">Best Score</p>
-                        <p className="text-2xl font-bold text-amber-900">{bestScore.percentage.toFixed(1)}%</p>
-                      </div>
-                      <div className="bg-white/60 backdrop-blur rounded-xl p-4">
-                        <p className="text-xs text-amber-700 mb-1">Status</p>
-                        <div className="flex items-center gap-1.5">
-                          {bestScore.passed ? (
-                            <>
-                              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                              <p className="text-sm font-semibold text-green-700">Passed</p>
-                            </>
-                          ) : (
-                            <>
-                              <svg className="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                              <p className="text-sm font-semibold text-rose-700">Try Again</p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Before You Start Section */}
-            <div className="bg-white rounded-2xl p-5 lg:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-100 mb-6 lg:mb-8">
-              <h2 className="text-lg lg:text-xl font-bold text-stone-900 mb-4 pb-3 border-b border-stone-100">
-                Before you start
-              </h2>
-              <ul className="space-y-3 lg:space-y-3.5">
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2 flex-shrink-0"></span>
-                  <span className="text-sm lg:text-base text-stone-600">You must complete this test in one session - make sure your internet is reliable.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2 flex-shrink-0"></span>
-                  <span className="text-sm lg:text-base text-stone-600">1 mark awarded for a correct answer. Negative marking of -0.33 for each wrong answer.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2 flex-shrink-0"></span>
-                  <span className="text-sm lg:text-base text-stone-600">More you give the correct answer more chance to win the badge.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 rounded-full bg-stone-400 mt-2 flex-shrink-0"></span>
-                  <span className="text-sm lg:text-base text-stone-600">If you don&apos;t earn a badge this time, you can retake this test once more.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* All the Best Message */}
-            <div className="text-center mb-6">
-              <p className="text-stone-400 text-sm lg:text-base uppercase tracking-wider font-medium">All the best!!</p>
-            </div>
-          </div>
-        </main>
-
-        {/* Bottom Action Bar */}
-        <div className="sticky bottom-0 bg-white border-t border-stone-100 p-4 lg:p-5">
-          <div className="max-w-5xl mx-auto flex items-center gap-3 lg:gap-4">
-            <button 
-              onClick={() => router.back()}
-              className="p-3 lg:p-3.5 hover:bg-stone-100 rounded-xl transition-colors border border-stone-200"
-            >
-              <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleStartExam}
-              className="flex-1 py-4 lg:py-4.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-bold text-base lg:text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
-            >
-              Start Test
-            </button>
-          </div>
-        </div>
-      </div>
+      <ExamInstructions
+        exam={exam}
+        questionsLoading={questionsLoading}
+        questionsPrefetched={questionsPrefetched}
+        attemptCount={attemptCount}
+        bestScore={bestScore}
+        onStartExam={handleStartExam}
+      />
     );
   }
 
   if (showResult) {
-    const { score, percentage, passed } = calculateScore();
+    // Use API result if available, otherwise fallback to calculateScore
+    const resultData = submissionResult || calculateScore();
+    const { score, percentage, passed } = resultData;
+    const correctAnswers = submissionResult?.correctAnswers || answers.filter((answer, index) => 
+      answer !== null && answer === questions[index].correctAnswer
+    ).length;
+    const wrongAnswers = submissionResult?.wrongAnswers || answers.filter((answer, index) => 
+      answer !== null && answer !== questions[index].correctAnswer
+    ).length;
+    const skipped = submissionResult?.skipped || answers.filter(answer => answer === null).length;
+    
+    const timeTaken = (exam?.duration || 0) * 60 - timeRemaining;
+
+    // Show main result screen
+    if (!showQuestionReview) {
+      return (
+        <ExamResult
+          exam={exam}
+          questions={questions}
+          answers={answers}
+          score={score}
+          percentage={percentage}
+          passed={passed}
+          correctAnswers={correctAnswers}
+          wrongAnswers={wrongAnswers}
+          skipped={skipped}
+          timeTaken={timeTaken}
+          onReviewAnswers={() => setShowQuestionReview(true)}
+        />
+      );
+    }
+    
+    // Question Review View (keep existing implementation)
     const filteredQuestions = getFilteredQuestions();
     const filterCounts = getFilterCounts();
-    
-    // Format time taken
-    const timeTaken = (exam?.duration || 0) * 60 - timeRemaining;
-    const minutesTaken = Math.floor(timeTaken / 60);
-    const secondsTaken = timeTaken % 60;
-    
-    // Calculate answered questions
-    const answeredCount = answers.filter(a => a !== null).length;
+    const currentFilteredItem = filteredQuestions[reviewQuestionIndex];
+    const reviewQuestion = currentFilteredItem?.question || questions[0];
+    const actualQuestionIndex = currentFilteredItem?.index || 0;
+    const userAnswer = answers[actualQuestionIndex];
+    const isCorrect = userAnswer === reviewQuestion.correctAnswer;
 
-    // Question Review View
-    if (showQuestionReview) {
-      const currentFilteredItem = filteredQuestions[reviewQuestionIndex];
-      const reviewQuestion = currentFilteredItem?.question || questions[0];
-      const actualQuestionIndex = currentFilteredItem?.index || 0;
-      const userAnswer = answers[actualQuestionIndex];
-      const isCorrect = userAnswer === reviewQuestion.correctAnswer;
-
-      return (
+    return (
         <div className="min-h-screen bg-gradient-to-br from-stone-100 via-teal-50/30 to-stone-100 flex flex-col">
           {/* Header */}
           <div className="bg-white shadow-md sticky top-0 z-40">
@@ -810,140 +825,6 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
           )}
         </div>
       );
-    }
-
-    // Main Result Screen - Celebration Style
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-100 via-teal-50/30 to-stone-100 flex flex-col">
-        {/* Main Content */}
-        <main className="flex-1 flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md animate-scale-up">
-            {/* Celebration Card */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-              {/* Confetti/Celebration Header */}
-              <div className={`relative pt-10 pb-8 px-6 text-center ${
-                passed 
-                  ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-600' 
-                  : 'bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600'
-              }`}>
-                {/* Decorative circles */}
-                <div className="absolute top-4 left-4 w-3 h-3 rounded-full bg-white/30"></div>
-                <div className="absolute top-8 left-10 w-2 h-2 rounded-full bg-white/20"></div>
-                <div className="absolute top-6 right-8 w-4 h-4 rounded-full bg-white/25"></div>
-                <div className="absolute top-12 right-4 w-2 h-2 rounded-full bg-white/30"></div>
-                <div className="absolute bottom-6 left-6 w-2 h-2 rounded-full bg-white/20"></div>
-                <div className="absolute bottom-4 right-12 w-3 h-3 rounded-full bg-white/25"></div>
-                
-                {/* Trophy/Completion Icon */}
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
-                  {passed ? (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  )}
-                </div>
-
-                <h2 className="text-xl font-bold text-white mb-1">
-                  {passed ? 'Congratulations! 🎉' : 'Keep Going! 💪'}
-                </h2>
-                <p className="text-white/90 text-sm">
-                  You have completed
-                </p>
-                <p className="text-white font-semibold mt-1">
-                  {exam?.name}
-                </p>
-              </div>
-
-              {/* Results Section */}
-              <div className="p-6">
-                <p className="text-center text-stone-500 text-sm mb-5">Here are your results:</p>
-                
-                {/* Stats Grid - 2x2 */}
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Total Questions */}
-                  <div className="bg-stone-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-stone-200 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-lg font-bold text-stone-800">{totalQuestions}</p>
-                    <p className="text-xs text-stone-500">Total Questions</p>
-                  </div>
-
-                  {/* Working Time */}
-                  <div className="bg-blue-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-blue-200 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <p className="text-lg font-bold text-blue-700">{minutesTaken}:{secondsTaken.toString().padStart(2, '0')}</p>
-                    <p className="text-xs text-blue-600">Time Taken</p>
-                  </div>
-
-                  {/* Quiz Score */}
-                  <div className={`${passed ? 'bg-emerald-50' : 'bg-rose-50'} rounded-xl p-4 text-center`}>
-                    <div className={`w-10 h-10 ${passed ? 'bg-emerald-200' : 'bg-rose-200'} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                      <svg className={`w-5 h-5 ${passed ? 'text-emerald-600' : 'text-rose-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                    <p className={`text-lg font-bold ${passed ? 'text-emerald-700' : 'text-rose-700'}`}>{percentage.toFixed(0)}%</p>
-                    <p className={`text-xs ${passed ? 'text-emerald-600' : 'text-rose-600'}`}>Score</p>
-                  </div>
-
-                  {/* Answered Questions */}
-                  <div className="bg-teal-50 rounded-xl p-4 text-center">
-                    <div className="w-10 h-10 bg-teal-200 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-lg font-bold text-teal-700">{answeredCount}/{totalQuestions}</p>
-                    <p className="text-xs text-teal-600">Answered</p>
-                  </div>
-                </div>
-
-                {/* Review Questions Button */}
-                <button
-                  onClick={() => setShowQuestionReview(true)}
-                  className="w-full mt-5 py-3.5 bg-stone-100 text-stone-700 rounded-xl font-semibold text-sm hover:bg-stone-200 transition-all flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  Review Questions
-                </button>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* Bottom Action Bar */}
-        <div className="sticky bottom-0 bg-white border-t border-stone-100 p-4">
-          <div className="max-w-md mx-auto flex items-center gap-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="flex-1 py-3.5 bg-stone-100 text-stone-700 rounded-xl font-semibold hover:bg-stone-200 transition-all"
-            >
-              Retake
-            </button>
-            <button
-              onClick={() => router.push('/')}
-              className="flex-1 py-3.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-            >
-              Back to Home
-            </button>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   // Get status colors for question palette
@@ -1189,207 +1070,34 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         </div>
       </div>
 
-      {/* Question Palette Drawer - Slides from Right */}
-      {showMobilePalette && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50"
-          onClick={() => setShowMobilePalette(false)}
-        >
-          <div 
-            className="absolute top-0 right-0 bottom-0 w-72 sm:w-80 bg-white shadow-2xl flex flex-col animate-slide-right"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 border-b border-stone-100 bg-stone-50">
-              <button
-                onClick={() => setShowMobilePalette(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-200 transition-colors"
-              >
-                <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <div className="text-right">
-                <h3 className="font-bold text-stone-800">Theory Questions</h3>
-                <p className="text-xs text-stone-500">Question : {totalQuestions} Answered : {answeredCount}</p>
-              </div>
-            </div>
-
-            {/* Question Grid */}
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="grid grid-cols-4 gap-3">
-                {questions.map((_, index) => {
-                  const status = getQuestionStatus(index);
-                  const isAnswered = answers[index] !== null;
-                  const isMarked = markedForReview[index];
-                  const isVisited = visitedQuestions.has(index);
-                  const isCurrent = index === currentQuestionIndex;
-                  
-                  let buttonStyle = 'border-2 border-stone-300 text-stone-600 bg-white';
-                  if (isCurrent) {
-                    buttonStyle = 'border-2 border-teal-500 bg-teal-500 text-white';
-                  } else if (isAnswered) {
-                    buttonStyle = 'border-2 border-emerald-500 bg-emerald-500 text-white';
-                  } else if (isMarked) {
-                    buttonStyle = 'border-2 border-amber-500 bg-amber-500 text-white';
-                  } else if (isVisited) {
-                    buttonStyle = 'border-2 border-rose-500 bg-rose-500 text-white';
-                  }
-                  
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        handleQuestionJump(index);
-                        setShowMobilePalette(false);
-                      }}
-                      className={`h-11 w-11 rounded-full font-semibold transition-all text-sm mx-auto ${buttonStyle}`}
-                    >
-                      {index + 1}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="p-4 border-t border-stone-100 bg-stone-50">
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-emerald-500"></div>
-                  <span className="text-stone-600">Answered</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-rose-500 border-2 border-rose-500"></div>
-                  <span className="text-stone-600">Not Answered</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-amber-500 border-2 border-amber-500"></div>
-                  <span className="text-stone-600">Mark of Review</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-white border-2 border-stone-300"></div>
-                  <span className="text-stone-600">Not Visited</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Combined Review & Submit Confirmation Dialog */}
+      {/* Submit Confirmation Dialog */}
       {showSubmitConfirm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col animate-scale-up">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-center border-b border-white/20">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1">Review & Submit</h3>
-              <p className="text-sm text-white/90">Check your responses before final submission</p>
-            </div>
-
-            {/* Stats Summary */}
-            <div className="p-5 bg-stone-50 border-b border-stone-100">
-              <div className="grid grid-cols-4 gap-2">
-                <div className="bg-emerald-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-emerald-600">{answers.filter(a => a !== null).length}</p>
-                  <p className="text-[10px] text-emerald-700 uppercase tracking-wide">Answered</p>
-                </div>
-                <div className="bg-stone-100 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-stone-600">{visitedQuestions.size}</p>
-                  <p className="text-[10px] text-stone-700 uppercase tracking-wide">Visited</p>
-                </div>
-                <div className="bg-rose-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-rose-600">{answers.filter(a => a === null).length}</p>
-                  <p className="text-[10px] text-rose-700 uppercase tracking-wide">Skipped</p>
-                </div>
-                <div className="bg-amber-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-amber-600">{markedForReview.filter(Boolean).length}</p>
-                  <p className="text-[10px] text-amber-700 uppercase tracking-wide">Review</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Question Overview */}
-            <div className="flex-1 overflow-y-auto p-5">
-              <p className="text-xs text-stone-500 uppercase tracking-wide mb-3 font-medium">Question Overview</p>
-              <div className="grid grid-cols-8 gap-2">
-                {questions.map((_, index) => {
-                  const isAnswered = answers[index] !== null;
-                  const isMarked = markedForReview[index];
-                  
-                  let bgColor = 'bg-stone-200 text-stone-600';
-                  if (isAnswered) bgColor = 'bg-emerald-500 text-white';
-                  else if (isMarked) bgColor = 'bg-amber-500 text-white';
-                  else if (visitedQuestions.has(index)) bgColor = 'bg-rose-500 text-white';
-                  
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setShowSubmitConfirm(false);
-                        handleQuestionJump(index);
-                      }}
-                      className={`h-8 rounded-lg font-medium text-xs transition-all hover:scale-105 ${bgColor}`}
-                    >
-                      {index + 1}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* Legend */}
-              <div className="grid grid-cols-2 gap-2 mt-5 pt-4 border-t border-stone-100 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-emerald-500"></div>
-                  <span className="text-stone-600">Answered</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-rose-500"></div>
-                  <span className="text-stone-600">Not Answered</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-amber-500"></div>
-                  <span className="text-stone-600">For Review</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-stone-200"></div>
-                  <span className="text-stone-600">Not Visited</span>
-                </div>
-              </div>
-
-              {/* Warning Message */}
-              <div className="mt-5 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                <p className="text-xs text-amber-800 text-center">
-                  ⚠️ You cannot change your answers after submission
-                </p>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="p-5 border-t border-stone-100 bg-stone-50">
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowSubmitConfirm(false)}
-                  className="flex-1 py-3 bg-white border-2 border-stone-300 text-stone-700 rounded-xl font-semibold hover:bg-stone-100 transition-all"
-                >
-                  Go Back
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                >
-                  Submit Exam
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SubmitConfirmation
+          totalQuestions={totalQuestions}
+          answeredCount={answeredCount}
+          visitedCount={visitedQuestions.size}
+          skippedCount={answers.filter(a => a === null).length}
+          markedCount={markedForReview.filter(Boolean).length}
+          answers={answers}
+          markedForReview={markedForReview}
+          visitedQuestions={visitedQuestions}
+          onSubmit={handleSubmit}
+          onCancel={() => setShowSubmitConfirm(false)}
+          onQuestionJump={handleQuestionJump}
+        />
       )}
+
+      {/* Mobile Question Palette */}
+      <QuestionPalette
+        totalQuestions={totalQuestions}
+        currentQuestionIndex={currentQuestionIndex}
+        answers={answers}
+        markedForReview={markedForReview}
+        visitedQuestions={visitedQuestions}
+        onQuestionJump={handleQuestionJump}
+        showMobile={showMobilePalette}
+        onCloseMobile={() => setShowMobilePalette(false)}
+      />
     </div>
   );
 }
