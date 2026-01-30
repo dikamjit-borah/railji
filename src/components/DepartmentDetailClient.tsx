@@ -9,7 +9,6 @@ import TabNavigation from './department/TabNavigation';
 import FilterSection from './department/FilterSection';
 import PaperCard from './department/PaperCard';
 import MaterialCard from './department/MaterialCard';
-import StatsSection from './department/StatsSection';
 import MaterialViewer from './department/MaterialViewer';
 
 interface ExamPaper {
@@ -81,6 +80,8 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
   const [showOthersDropdown, setShowOthersDropdown] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string>('All');
   const [showSubjectsDropdown, setShowSubjectsDropdown] = useState(false);
+  const [sortBy, setSortBy] = useState<'name' | 'date'>('date');
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
   
   // API state
   const [departmentData, setDepartmentData] = useState<DepartmentData | null>(null);
@@ -178,12 +179,24 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
   }, [availableSubjects]);
 
   const filteredPapers = useMemo(() => {
-    return papers.filter(paper => {
+    const filtered = papers.filter(paper => {
       const matchType = selectedExamType === 'All' || paper.name === selectedExamType;
       const matchSubject = selectedSubject === 'All' || (paper.subjects && paper.subjects.includes(selectedSubject));
       return matchType && matchSubject;
     });
-  }, [papers, selectedExamType, selectedSubject]);
+
+    // Sort papers
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else {
+        // Sort by date (year and shift)
+        const yearCompare = b.year.localeCompare(a.year);
+        if (yearCompare !== 0) return yearCompare;
+        return b.shift.localeCompare(a.shift);
+      }
+    });
+  }, [papers, selectedExamType, selectedSubject, sortBy]);
 
   const materialTypeOptions = useMemo(() => {
     const types = [...new Set(materials.map(m => m.type))];
@@ -200,10 +213,10 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-teal-900 via-teal-800 to-teal-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-          <p className="text-white font-medium">Loading department data...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-4"></div>
+          <p className="text-stone-900 font-medium">Loading department data...</p>
         </div>
       </div>
     );
@@ -212,23 +225,23 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
   // Error state
   if (error || !department) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-teal-900 via-teal-800 to-teal-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
         <div className="text-center max-w-md px-4">
-          <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-16 h-16 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h2 className="text-2xl font-bold text-white mb-2">Failed to Load</h2>
-          <p className="text-white/80 mb-6">{error || 'Department not found'}</p>
+          <h2 className="text-2xl font-bold text-stone-900 mb-2">Failed to Load</h2>
+          <p className="text-stone-600 mb-6">{error || 'Department not found'}</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-white text-teal-900 rounded-xl font-medium hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 transition-all"
             >
               Try Again
             </button>
             <Link
               href="/departments"
-              className="px-6 py-3 bg-white/10 backdrop-blur text-white rounded-xl font-medium hover:bg-white/20 transition-all"
+              className="px-6 py-3 bg-stone-200 text-stone-900 rounded-xl font-medium hover:bg-stone-300 transition-all"
             >
               Go Back
             </Link>
@@ -243,7 +256,7 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
       <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-stone-900 mb-4">Department not found</h1>
-          <Link href="/departments" className="text-emerald-600 hover:underline">
+          <Link href="/departments" className="text-orange-600 hover:underline">
             Go back to departments
           </Link>
         </div>
@@ -270,8 +283,11 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-900 via-teal-800 to-teal-900">
-      <DepartmentHeader />
+    <div className="min-h-screen bg-[#faf9f7]">
+      <DepartmentHeader 
+        papers={departmentData?.papers || []}
+        onPaperSelect={handlePaperSelect}
+      />
 
       <DepartmentBanner
         department={department}
@@ -279,7 +295,7 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
         filteredCount={activeTab === 'papers' ? filteredPapers.length : filteredMaterials.length}
       />
 
-      <div className="px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8">
+      <div className="px-3 sm:px-4 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
         <div className="max-w-7xl mx-auto">
           <TabNavigation
             activeTab={activeTab}
@@ -304,9 +320,15 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
         showSubjectsDropdown={showSubjectsDropdown}
         onExamTypeChange={(type) => {
           setSelectedExamType(type);
+          setSelectedSubject('All'); // Reset subject when exam type changes
           setShowOthersDropdown(false);
         }}
-        onSubjectChange={setSelectedSubject}
+        onSubjectChange={(subject) => {
+          setSelectedSubject(subject);
+          if (subject !== 'All') {
+            setSelectedExamType('All'); // Reset exam type when subject is selected
+          }
+        }}
         onToggleOthersDropdown={() => {
           setShowOthersDropdown(!showOthersDropdown);
           setShowSubjectsDropdown(false);
@@ -321,34 +343,71 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
       />
 
       {/* Papers/Materials List */}
-      <main className="px-4 sm:px-6 lg:px-8 pb-12 lg:pb-16">
+      <main className="px-3 sm:px-4 lg:px-8 pb-8 sm:pb-10 lg:pb-12">
         <div className="max-w-7xl mx-auto">
           {activeTab === 'papers' ? (
             <>
               {/* Results Count */}
-              <div className="flex items-center justify-between mb-6 lg:mb-8">
-                <p className="text-teal-200 text-base lg:text-lg">
-                  Showing <span className="font-semibold text-white text-lg lg:text-xl">{filteredPapers.length}</span> {filteredPapers.length === 1 ? 'paper' : 'papers'}
+              <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+                <p className="text-stone-600 text-sm sm:text-base">
+                  Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{filteredPapers.length}</span> {filteredPapers.length === 1 ? 'paper' : 'papers'}
                 </p>
-                <div className="hidden lg:flex items-center gap-3 text-teal-200 text-sm">
-                  <button className="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2">
+                <div className="hidden lg:flex items-center gap-3 text-stone-700 text-sm relative">
+                  <button 
+                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                    className="px-4 py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-2"
+                  >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
                     </svg>
-                    Sort by
+                    Sort by: {sortBy === 'name' ? 'Name' : 'Date'}
+                    <svg className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
+                  
+                  {showSortDropdown && (
+                    <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-stone-200 py-2 min-w-[150px] z-50">
+                      <button
+                        onClick={() => {
+                          setSortBy('date');
+                          setShowSortDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
+                          sortBy === 'date'
+                            ? 'bg-orange-50 text-orange-700 font-medium'
+                            : 'text-stone-700'
+                        }`}
+                      >
+                        Date
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy('name');
+                          setShowSortDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
+                          sortBy === 'name'
+                            ? 'bg-orange-50 text-orange-700 font-medium'
+                            : 'text-stone-700'
+                        }`}
+                      >
+                        Name
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Papers Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredPapers.length === 0 ? (
-                  <div className="md:col-span-2 xl:col-span-3 bg-white/10 backdrop-blur-sm rounded-2xl p-10 text-center">
-                    <svg className="w-16 h-16 text-teal-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="md:col-span-2 lg:col-span-3 bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-10 text-center">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 text-orange-300 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 className="text-xl font-semibold text-white mb-2">No papers found</h3>
-                    <p className="text-teal-200">Try adjusting your filters</p>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">No papers found</h3>
+                    <p className="text-sm sm:text-base text-orange-200">Try adjusting your filters</p>
                   </div>
                 ) : (
                   filteredPapers.map((paper, index) => (
@@ -361,31 +420,25 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
                   ))
                 )}
               </div>
-
-              <StatsSection
-                totalCount={papers.length}
-                newCount={papers.filter(p => p.isNew).length}
-                type="papers"
-              />
             </>
           ) : (
             <>
               {/* Materials Results Count */}
-              <div className="flex items-center justify-between mb-6 lg:mb-8">
-                <p className="text-teal-200 text-base lg:text-lg">
-                  Showing <span className="font-semibold text-white text-lg lg:text-xl">{filteredMaterials.length}</span> {filteredMaterials.length === 1 ? 'material' : 'materials'}
+              <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
+                <p className="text-orange-200 text-sm sm:text-base">
+                  Showing <span className="font-semibold text-white text-base sm:text-lg">{filteredMaterials.length}</span> {filteredMaterials.length === 1 ? 'material' : 'materials'}
                 </p>
               </div>
 
               {/* Materials Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredMaterials.length === 0 ? (
-                  <div className="md:col-span-2 xl:col-span-3 bg-white/10 backdrop-blur-sm rounded-2xl p-10 text-center">
-                    <svg className="w-16 h-16 text-teal-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="md:col-span-2 lg:col-span-3 bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-10 text-center">
+                    <svg className="w-12 h-12 sm:w-16 sm:h-16 text-orange-300 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <h3 className="text-xl font-semibold text-white mb-2">No materials found</h3>
-                    <p className="text-teal-200">Try adjusting your filters</p>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">No materials found</h3>
+                    <p className="text-sm sm:text-base text-orange-200">Try adjusting your filters</p>
                   </div>
                 ) : (
                   filteredMaterials.map((material, index) => (
@@ -398,12 +451,6 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
                   ))
                 )}
               </div>
-
-              <StatsSection
-                totalCount={materials.length}
-                notesCount={materials.filter(m => m.type === 'notes').length}
-                type="materials"
-              />
             </>
           )}
         </div>

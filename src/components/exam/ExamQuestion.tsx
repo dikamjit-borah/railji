@@ -27,6 +27,11 @@ interface ExamQuestionProps {
   onSelectAnswer: (optionIndex: number) => void;
   markedForReview?: boolean;
   onToggleMarkForReview?: () => void;
+  reviewMode?: boolean;
+  correctAnswer?: number;
+  onSubmit?: () => void;
+  showSubmitButton?: boolean;
+  practiceMode?: boolean;
 }
 
 export default function ExamQuestion({
@@ -36,107 +41,124 @@ export default function ExamQuestion({
   selectedAnswer,
   onSelectAnswer,
   markedForReview = false,
-  onToggleMarkForReview
+  onToggleMarkForReview,
+  reviewMode = false,
+  correctAnswer,
+  onSubmit,
+  showSubmitButton = false,
+  practiceMode = false
 }: ExamQuestionProps) {
-  // const [showExtras, setShowExtras] = useState(true);
+  const actualCorrectAnswer = correctAnswer ?? question.correctAnswer;
+  const showFeedback = (practiceMode && selectedAnswer !== null) || reviewMode;
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col max-h-[calc(100vh-180px)] sm:max-h-[calc(100vh-160px)]">
       {/* Question Card */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        {/* Question Header with Flag Button */}
-        <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-5 py-4">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
+        {/* Question Header with Flag Button - Sticky */}
+        <div className={`sticky top-0 z-10 px-3 sm:px-4 lg:px-5 py-3 sm:py-3.5 lg:py-4 text-white ${
+          showFeedback
+            ? selectedAnswer === actualCorrectAnswer
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+              : selectedAnswer === null
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+              : 'bg-gradient-to-r from-red-500 to-red-600'
+            : 'bg-gradient-to-r from-orange-600 to-orange-500'
+        }`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center font-bold text-lg">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-white/20 backdrop-blur rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-lg">
                 {questionIndex + 1}
               </span>
               <div>
-                <p className="text-sm opacity-90">Question {questionIndex + 1} of {totalQuestions}</p>
-                <p className="text-xs opacity-75">+1 for correct, -0.33 for wrong</p>
+                <p className="text-xs sm:text-sm opacity-90">Question {questionIndex + 1} of {totalQuestions}</p>
+                <p className="text-xxs sm:text-xs opacity-75">
+                  {showFeedback
+                    ? selectedAnswer === actualCorrectAnswer
+                      ? practiceMode ? '✓ Correct Answer!' : 'Answered Correctly'
+                      : selectedAnswer === null
+                      ? 'Skipped'
+                      : practiceMode ? '✗ Incorrect' : 'Answered Incorrectly'
+                    : '+1 for correct, -0.33 for wrong'
+                  }
+                </p>
               </div>
             </div>
-            {onToggleMarkForReview && (
-              <button
-                onClick={onToggleMarkForReview}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  markedForReview
-                    ? 'bg-amber-400 text-amber-900'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-              >
-                <svg className="w-4 h-4" fill={markedForReview ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                <span className="hidden sm:inline">{markedForReview ? 'Flagged' : 'Flag for Review'}</span>
-              </button>
-            )}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {showSubmitButton && onSubmit && (
+                <button
+                  onClick={onSubmit}
+                  className="sm:hidden px-2.5 py-1 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 transition-all"
+                >
+                  Submit
+                </button>
+              )}
+              {onToggleMarkForReview && !reviewMode && (
+                <button
+                  onClick={onToggleMarkForReview}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    markedForReview
+                      ? 'bg-amber-400 text-amber-900'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={markedForReview ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <span className="hidden sm:inline">{markedForReview ? 'Flagged' : 'Flag for Review'}</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Question Text */}
-        <div className="p-5 sm:p-6 border-b border-stone-100">
-          <p className="text-base sm:text-lg font-semibold text-stone-800 leading-relaxed mb-3">
-            {question.question.en}
-          </p>
-          {
-            question.question.hi && (
-              <p className="text-base sm:text-lg text-stone-600 leading-relaxed rounded-lg font-hindi">
-                {question.question.hi}
-              </p>
-            )
-          }
-          
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Question Text */}
+          <div className="p-3 sm:p-4 lg:p-5 border-b border-stone-100">
+          {question.question.en && (
+            <p className={`text-sm sm:text-base lg:text-lg font-semibold text-stone-800 leading-relaxed ${
+              question.question.hi ? 'mb-2 sm:mb-3' : ''
+            }`}>
+              {question.question.en}
+            </p>
+          )}
+          {question.question.hi && (
+            <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed rounded-lg font-hindi">
+              {question.question.hi}
+            </p>
+          )}
         </div>
 
         {/* Extras Section - Collapsible & Compact */}
         {question.extras && question.extras.length > 0 && (
           <div className="border-b border-blue-100">
             {/* Collapsible Header */}
-            {/* <button
-              onClick={() => setShowExtras(!showExtras)}
-              className="w-full px-4 py-2 bg-blue-50/50 flex items-center justify-between hover:bg-blue-50 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <svg 
-                  className={`w-4 h-4 text-blue-600 transition-transform ${showExtras ? 'rotate-90' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                  Additional Info ({question.extras.length})
-                </span>
-              </div>
-              <span className="text-xs text-blue-500">
-                {showExtras ? 'Hide' : 'Show'}
-              </span>
-            </button> */}
+            
             
             {/* Extras Content - Compact Grid */}
             {(
-              <div className="px-4 py-3 bg-gradient-to-b from-blue-50/30 to-transparent">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-b from-blue-50/30 to-transparent">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-2">
                   {question.extras.map((extra, index) => (
                     <div 
                       key={index} 
-                      className="bg-white rounded-lg px-3 py-2 border border-blue-100 hover:border-blue-200 transition-colors"
+                      className="bg-white rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 border border-blue-100 hover:border-blue-200 transition-colors"
                     >
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 sm:gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-stone-700 leading-relaxed line-clamp-3">
-                            {extra.en}
-                          </p>
-                          {
-                            extra.hi && (
-                              <p className="text-md text-stone-700 leading-relaxed mt-4 line-clamp-3 font-hindi">
-                                {extra.hi}
-                              </p>
-                            )
-                          }
-                          
+                          {extra.en && (
+                            <p className={`text-xs sm:text-sm font-medium text-stone-700 leading-relaxed line-clamp-3 ${
+                              extra.hi ? 'mb-1.5 sm:mb-2' : ''
+                            }`}>
+                              {extra.en}
+                            </p>
+                          )}
+                          {extra.hi && (
+                            <p className="text-xs sm:text-md text-stone-700 leading-relaxed line-clamp-3 font-hindi">
+                              {extra.hi}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -148,48 +170,82 @@ export default function ExamQuestion({
         )}
 
         {/* Options */}
-        <div className="p-4 sm:p-5 space-y-3">
-          {question.options.en.map((option, optIndex) => {
+        <div className="p-3 sm:p-4 lg:p-5 space-y-2 sm:space-y-3">
+          {(question.options.en || question.options.hi).map((option, optIndex) => {
             const optionLetter = String.fromCharCode(65 + optIndex);
             const isSelected = selectedAnswer === optIndex;
+            const isCorrectOption = showFeedback && optIndex === actualCorrectAnswer;
+            const isWrongOption = showFeedback && isSelected && optIndex !== actualCorrectAnswer;
+
+            let optionStyle = 'border-stone-200 bg-white';
+            let badgeStyle = 'bg-stone-100 text-stone-600';
+            
+            if (showFeedback) {
+              if (isCorrectOption) {
+                optionStyle = 'border-green-500 bg-green-50';
+                badgeStyle = 'bg-green-500 text-white';
+              } else if (isWrongOption) {
+                optionStyle = 'border-red-500 bg-red-50';
+                badgeStyle = 'bg-red-500 text-white';
+              }
+            } else if (isSelected) {
+              optionStyle = 'border-orange-500 bg-orange-50 shadow-md';
+              badgeStyle = 'bg-orange-500 text-white';
+            }
 
             return (
               <button
                 key={optIndex}
                 onClick={() => onSelectAnswer(optIndex)}
-                className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                  isSelected
-                    ? 'border-teal-500 bg-teal-50 shadow-md'
-                    : 'border-stone-200 bg-white hover:border-teal-300 hover:bg-teal-50/30'
+                disabled={reviewMode}
+                className={`w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
+                  optionStyle
+                } ${
+                  !reviewMode && !isSelected && !showFeedback ? 'hover:border-orange-300 hover:bg-orange-50/30' : ''
+                } ${
+                  reviewMode ? 'cursor-default' : ''
                 }`}
               >
-                <div className="flex items-start gap-4">
-                  <span className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base transition-all ${
-                    isSelected
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-stone-100 text-stone-600'
+                <div className="flex items-start gap-2.5 sm:gap-3 lg:gap-4">
+                  <span className={`flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-sm sm:text-base transition-all ${
+                    badgeStyle
                   }`}>
                     {optionLetter}
                   </span>
-                  <div className="flex-1 pt-1">
-                    <p className={`text-sm sm:text-base font-medium mb-1 ${
-                      isSelected ? 'text-teal-800' : 'text-stone-700'
-                    }`}>
-                      {option}
-                    </p>
-                    {
-                      (question.options.hi && question.options.hi[optIndex]) && (
-                        <p className="text-md sm:text-sm text-stone-600 font-hindi">
-                          {question.options.hi[optIndex]}
-                        </p>
-                      )
-                    }
-                    
+                  <div className="flex-1 pt-0.5 sm:pt-1">
+                    {(question.options.en && question.options.en[optIndex]) && (
+                      <p className={`text-xs sm:text-sm lg:text-base font-medium ${
+                        (question.options.hi && question.options.hi[optIndex]) ? 'mb-1' : ''
+                      } ${
+                        isCorrectOption ? 'text-yellow-800' : isWrongOption ? 'text-red-800' : isSelected && !reviewMode ? 'text-orange-800' : 'text-stone-700'
+                      }`}>
+                        {question.options.en[optIndex]}
+                      </p>
+                    )}
+                    {(question.options.hi && question.options.hi[optIndex]) && (
+                      <p className="text-xs sm:text-md lg:text-sm text-stone-600 font-hindi">
+                        {question.options.hi[optIndex]}
+                      </p>
+                    )}
                   </div>
-                  {isSelected && (
-                    <div className="flex-shrink-0 w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isSelected && !reviewMode && (
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                  {isCorrectOption && (
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                  {isWrongOption && (
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </div>
                   )}
@@ -197,6 +253,7 @@ export default function ExamQuestion({
               </button>
             );
           })}
+        </div>
         </div>
       </div>
     </div>

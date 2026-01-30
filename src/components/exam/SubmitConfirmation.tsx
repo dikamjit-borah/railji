@@ -31,43 +31,43 @@ export default function SubmitConfirmation({
     const isAnswered = answers[index] !== null;
     const isMarked = markedForReview[index];
     
-    if (isAnswered) return 'bg-sky-400 text-white';
+    if (isAnswered) return 'bg-blue-400 text-white';
     if (isMarked) return 'bg-amber-500 text-white';
     if (visitedQuestions.has(index)) return 'bg-stone-400 text-white';
     return 'bg-stone-200 text-stone-600';
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="p-5 border-b border-stone-100">
-          <h2 className="text-xl font-bold text-stone-800 mb-1">Submit Exam Confirmation</h2>
-          <p className="text-sm text-stone-500">Review your answers before final submission</p>
+        <div className="p-3 sm:p-4 lg:p-5 border-b border-stone-100">
+          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-stone-800 mb-1">Submit Exam Confirmation</h2>
+          <p className="text-xs sm:text-sm text-stone-500">Review your answers before final submission</p>
         </div>
 
         {/* Stats Summary */}
-        <div className="p-5 bg-stone-50 border-b border-stone-100">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-sky-50 rounded-xl p-3 border-2 border-sky-400 flex flex-col items-center justify-center">
-              <p className="text-2xl font-bold text-sky-600">{answeredCount}</p>
-              <p className="text-xs text-sky-700 uppercase tracking-wide">Answered</p>
+        <div className="p-3 sm:p-4 lg:p-5 bg-stone-50 border-b border-stone-100">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-blue-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-blue-400 flex flex-col items-center justify-center">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">{answeredCount}</p>
+              <p className="text-xxs sm:text-xs text-blue-700 uppercase tracking-wide">Answered</p>
             </div>
-            <div className="bg-stone-50 rounded-xl p-3 border-2 border-stone-400 flex flex-col items-center justify-center">
-              <p className="text-2xl font-bold text-stone-600">{skippedCount}</p>
-              <p className="text-xs text-stone-700 uppercase tracking-wide">Skipped</p>
+            <div className="bg-stone-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-stone-400 flex flex-col items-center justify-center">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-stone-600">{skippedCount}</p>
+              <p className="text-xxs sm:text-xs text-stone-700 uppercase tracking-wide">Skipped</p>
             </div>
-            <div className="bg-amber-50 rounded-xl p-3 border-2 border-amber-500 flex flex-col items-center justify-center">
-              <p className="text-2xl font-bold text-amber-600">{markedCount}</p>
-              <p className="text-xs text-amber-700 uppercase tracking-wide">Review</p>
+            <div className="bg-amber-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-amber-500 flex flex-col items-center justify-center">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-amber-600">{markedCount}</p>
+              <p className="text-xxs sm:text-xs text-amber-700 uppercase tracking-wide">Review</p>
             </div>
           </div>
         </div>
 
         {/* Question Overview */}
-        <div className="flex-1 overflow-y-auto p-5">
-          <p className="text-xs text-stone-500 uppercase tracking-wide mb-3 font-medium text-center">Question Overview</p>
-          <div className="grid grid-cols-8 gap-2">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5">
+          <p className="text-xxs sm:text-xs text-stone-500 uppercase tracking-wide mb-2 sm:mb-3 font-medium text-center">Question Overview</p>
+          <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5 sm:gap-2">
             {Array.from({ length: totalQuestions }).map((_, index) => {
               const statusColor = getQuestionStatus(index);
 
@@ -78,7 +78,7 @@ export default function SubmitConfirmation({
                     onCancel();
                     onQuestionJump(index);
                   }}
-                  className={`h-8 rounded-lg font-medium text-xs transition-all hover:scale-105 ${statusColor}`}
+                  className={`h-7 sm:h-8 rounded-lg font-medium text-xxs sm:text-xs transition-all hover:scale-105 ${statusColor}`}
                 >
                   {index + 1}
                 </button>
@@ -87,45 +87,45 @@ export default function SubmitConfirmation({
           </div>
           
           {/* Legend */}
-          <div className="grid grid-cols-2 gap-2 mt-5 pt-4 border-t border-stone-100 text-xs">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-sky-400"></div>
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-3 sm:mt-4 lg:mt-5 pt-3 sm:pt-4 border-t border-stone-100 text-xxs sm:text-xs">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-blue-400"></div>
               <span className="text-stone-600">Answered</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-stone-400"></div>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-stone-400"></div>
               <span className="text-stone-600">Skipped</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-amber-500"></div>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-amber-500"></div>
               <span className="text-stone-600">For Review</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-stone-200"></div>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded bg-stone-200"></div>
               <span className="text-stone-600">Not Visited</span>
             </div>
           </div>
 
           {/* Warning Message */}
-          <div className="mt-5 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-            <p className="text-xs text-amber-800 text-center">
+          <div className="mt-3 sm:mt-4 lg:mt-5 p-2.5 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg sm:rounded-xl">
+            <p className="text-xxs sm:text-xs text-amber-800 text-center">
               ⚠️ You cannot change your answers after submission
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="p-5 border-t border-stone-100 bg-stone-50">
-          <div className="flex gap-3">
+        <div className="p-3 sm:p-4 lg:p-5 border-t border-stone-100 bg-stone-50">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 py-3 bg-white border-2 border-stone-300 text-stone-700 rounded-xl font-semibold hover:bg-stone-100 transition-all"
+              className="flex-1 py-2.5 sm:py-3 bg-white border-2 border-stone-300 text-stone-700 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:bg-stone-100 transition-all"
             >
               Go Back
             </button>
             <button
               onClick={onSubmit}
-              className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+              className="flex-1 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:shadow-lg transition-all"
             >
               Submit Exam
             </button>

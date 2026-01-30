@@ -62,6 +62,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   const [markedForReview, setMarkedForReview] = useState<boolean[]>([]);
   const [visitedQuestions, setVisitedQuestions] = useState<Set<number>>(new Set());
   const [showQuestionReview, setShowQuestionReview] = useState(false);
+  const [examMode, setExamMode] = useState<'exam' | 'practice' | null>(null);
   
   // API state
   const [loading, setLoading] = useState(true);
@@ -189,7 +190,8 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     };
   }, [hasStarted, showResult]);
 
-  const handleStartExam = async () => {
+  const handleStartExam = async (mode: 'exam' | 'practice') => {
+    setExamMode(mode);
     try {
       // Use cached questions if available, otherwise fetch now
       if (questionsPrefetched && questionsCache.current.length > 0) {
@@ -558,47 +560,54 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     const isCorrect = userAnswer === reviewQuestion.correctAnswer;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-stone-100 via-teal-50/30 to-stone-100 flex flex-col">
+        <div className="min-h-screen bg-gradient-to-br from-stone-100 via-orange-50/30 to-stone-100 flex flex-col">
           {/* Header */}
           <div className="bg-white shadow-md sticky top-0 z-40">
-            <div className="max-w-2xl mx-auto px-4 py-3">
+            <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <button
                     onClick={() => setShowQuestionReview(false)}
-                    className="p-2 hover:bg-stone-100 rounded-xl transition-all"
+                    className="p-1.5 sm:p-2 hover:bg-stone-100 rounded-lg sm:rounded-xl transition-all"
                   >
                     <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                   <div>
-                    <h1 className="text-sm font-bold text-stone-800">Question Review</h1>
-                    <p className="text-xs text-stone-500">{exam?.name}</p>
+                    <h1 className="text-xs sm:text-sm font-bold text-stone-800">Question Review</h1>
+                    <p className="text-xxs sm:text-xs text-stone-500">{exam?.name}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowReviewPalette(true)}
-                  className="p-2 hover:bg-stone-100 rounded-xl transition-all"
-                >
-                  <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
-                    <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
-                    <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
-                    <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={() => setShowReviewPalette(true)}
+                    className="p-1.5 sm:p-2 hover:bg-stone-100 rounded-lg sm:rounded-xl transition-all"
+                  >
+                    <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
+                      <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
+                      <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
+                      <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
+                    </svg>
+                  </button>
+                  <img
+                    src="/images/logo.png"
+                    alt="RailJee Logo"
+                    className="h-10 sm:h-12 w-auto"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Filter Tabs */}
           <div className="bg-white border-b border-stone-100">
-            <div className="max-w-2xl mx-auto px-4 py-3">
-              <div className="flex flex-wrap gap-2">
+            <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <button
                   onClick={() => { setReviewFilter('all'); setReviewQuestionIndex(0); }}
-                  className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-medium text-xxs sm:text-xs transition-all ${
                     reviewFilter === 'all' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                   }`}
                 >
@@ -606,16 +615,16 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
                 </button>
                 <button
                   onClick={() => { setReviewFilter('correct'); setReviewQuestionIndex(0); }}
-                  className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
-                    reviewFilter === 'correct' ? 'bg-emerald-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-medium text-xxs sm:text-xs transition-all ${
+                    reviewFilter === 'correct' ? 'bg-yellow-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                   }`}
                 >
                   Correct ({filterCounts.correct})
                 </button>
                 <button
                   onClick={() => { setReviewFilter('wrong'); setReviewQuestionIndex(0); }}
-                  className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-all ${
-                    reviewFilter === 'wrong' ? 'bg-rose-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-medium text-xxs sm:text-xs transition-all ${
+                    reviewFilter === 'wrong' ? 'bg-red-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                   }`}
                 >
                   Wrong ({filterCounts.wrong})
@@ -650,211 +659,72 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
                   </p>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  {/* Question Header */}
-                  <div className={`px-5 py-4 ${
-                    isCorrect ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : userAnswer === null ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-rose-500 to-pink-600'
-                  } text-white`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center font-bold text-lg">
-                          {actualQuestionIndex + 1}
-                        </span>
-                        <div>
-                          <p className="text-sm opacity-90">Question {reviewQuestionIndex + 1} of {filteredQuestions.length}</p>
-                          <p className="text-xs opacity-75">
-                            {isCorrect ? 'Answered Correctly' : userAnswer === null ? 'Skipped' : 'Answered Incorrectly'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setReviewQuestionIndex(Math.max(0, reviewQuestionIndex - 1))}
-                          disabled={reviewQuestionIndex === 0}
-                          className="p-2 bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => setReviewQuestionIndex(Math.min(filteredQuestions.length - 1, reviewQuestionIndex + 1))}
-                          disabled={reviewQuestionIndex === filteredQuestions.length - 1}
-                          className="p-2 bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      </div>
+                <>
+                  {/* ExamQuestion Component with Review Mode */}
+                  <div className="mb-4">
+                    <ExamQuestion
+                      question={reviewQuestion}
+                      questionIndex={actualQuestionIndex}
+                      totalQuestions={questions.length}
+                      selectedAnswer={userAnswer}
+                      onSelectAnswer={() => {}} // No-op in review mode
+                      reviewMode={true}
+                      correctAnswer={reviewQuestion.correctAnswer}
+                    />
+                  </div>
+
+                  {/* Bottom Action Bar */}
+                  <div className="bg-white rounded-2xl shadow-lg p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      {/* Previous Button */}
+                      <button
+                        onClick={() => setReviewQuestionIndex(Math.max(0, reviewQuestionIndex - 1))}
+                        disabled={reviewQuestionIndex === 0}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-all font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span className="hidden sm:inline">Previous</span>
+                      </button>
+
+                      {/* Next Button */}
+                      <button
+                        onClick={() => setReviewQuestionIndex(Math.min(filteredQuestions.length - 1, reviewQuestionIndex + 1))}
+                        disabled={reviewQuestionIndex === filteredQuestions.length - 1}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <span>Next</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-
-                  {/* Question Text */}
-                  <div className="p-5 border-b border-stone-100">
-                    <p className="text-base font-semibold text-stone-800 leading-relaxed mb-2">
-                      {reviewQuestion.question.en}
-                    </p>
-                    {
-                      reviewQuestion.question.hi && (
-                        <p className="text-sm text-stone-600 leading-relaxed bg-amber-50/50 p-3 rounded-lg border border-amber-100 font-hindi">
-                          {reviewQuestion.question.hi}
-                        </p>
-                      )
-                    }
-
-                  </div>
-
-                  {/* Options */}
-                  <div className="p-4 space-y-3">
-                    {reviewQuestion.options.en.map((option, optIndex) => {
-                      const isUserAnswer = userAnswer === optIndex;
-                      const isCorrectAnswer = reviewQuestion.correctAnswer === optIndex;
-                      const optionLetter = String.fromCharCode(65 + optIndex);
-
-                      let optionStyle = 'border-stone-200 bg-white';
-                      let badgeStyle = 'bg-stone-100 text-stone-600';
-                      
-                      if (isCorrectAnswer) {
-                        optionStyle = 'border-emerald-500 bg-emerald-50';
-                        badgeStyle = 'bg-emerald-500 text-white';
-                      } else if (isUserAnswer) {
-                        optionStyle = 'border-rose-500 bg-rose-50';
-                        badgeStyle = 'bg-rose-500 text-white';
-                      }
-
-                      return (
-                        <div
-                          key={optIndex}
-                          className={`p-4 rounded-xl border-2 ${optionStyle}`}
-                        >
-                          <div className="flex items-start gap-4">
-                            <span className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base ${badgeStyle}`}>
-                              {optionLetter}
-                            </span>
-                            <div className="flex-1 pt-1">
-                              <p className={`text-sm font-medium mb-1 ${isCorrectAnswer ? 'text-emerald-800' : isUserAnswer ? 'text-rose-800' : 'text-stone-700'}`}>
-                                {option}
-                              </p>
-                              {
-                                reviewQuestion.options.hi[optIndex] && (
-                                <p className="text-xs text-stone-500 font-hindi">
-                                  {reviewQuestion.options.hi[optIndex]}
-                                </p>)
-                              }
-                              
-                            </div>
-                            {isCorrectAnswer && (
-                              <span className="flex-shrink-0 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </span>
-                            )}
-                            {isUserAnswer && !isCorrectAnswer && (
-                              <span className="flex-shrink-0 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                </>
               )}
             </div>
           </main>
 
-          {/* Review Question Palette Drawer */}
-          {showReviewPalette && (
-            <div 
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowReviewPalette(false)}
-            >
-              <div 
-                className="absolute top-0 right-0 bottom-0 w-72 sm:w-80 bg-white shadow-2xl flex flex-col animate-slide-right"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-4 border-b border-stone-100 bg-stone-50">
-                  <button
-                    onClick={() => setShowReviewPalette(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-200 transition-colors"
-                  >
-                    <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <div className="text-right">
-                    <h3 className="font-bold text-stone-800">Question Overview</h3>
-                    <p className="text-xs text-stone-500">{filteredQuestions.length} questions</p>
-                  </div>
-                </div>
-
-                {/* Question Grid */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="grid grid-cols-4 gap-3">
-                    {questions.map((question, index) => {
-                      const answer = answers[index];
-                      const isCurrentQuestion = filteredQuestions[reviewQuestionIndex]?.index === index;
-                      const isCorrectAnswer = answer === question.correctAnswer;
-                      const isWrongAnswer = answer !== null && !isCorrectAnswer;
-                      
-                      let buttonStyle = 'border-2 border-amber-400 bg-amber-100 text-amber-700';
-                      if (isCurrentQuestion) {
-                        buttonStyle = 'border-2 border-teal-500 bg-teal-500 text-white ring-2 ring-teal-300';
-                      } else if (isCorrectAnswer) {
-                        buttonStyle = 'border-2 border-emerald-500 bg-emerald-500 text-white';
-                      } else if (isWrongAnswer) {
-                        buttonStyle = 'border-2 border-rose-500 bg-rose-500 text-white';
-                      }
-                      
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            const filteredIndex = filteredQuestions.findIndex(item => item.index === index);
-                            if (filteredIndex !== -1) {
-                              setReviewQuestionIndex(filteredIndex);
-                            }
-                            setShowReviewPalette(false);
-                          }}
-                          className={`h-11 w-11 rounded-full font-semibold transition-all text-sm mx-auto ${buttonStyle}`}
-                        >
-                          {index + 1}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="p-4 border-t border-stone-100 bg-stone-50">
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
-                      <span className="text-stone-600">Correct</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full bg-rose-500"></div>
-                      <span className="text-stone-600">Wrong</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full bg-amber-100 border-2 border-amber-400"></div>
-                      <span className="text-stone-600">Skipped</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full bg-teal-500 ring-2 ring-teal-300"></div>
-                      <span className="text-stone-600">Current</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Review Question Palette */}
+          <QuestionPalette
+            totalQuestions={questions.length}
+            currentQuestionIndex={actualQuestionIndex}
+            answers={answers}
+            markedForReview={markedForReview}
+            visitedQuestions={new Set(questions.map((_, i) => i))}
+            onQuestionJump={(index) => {
+              const filteredIndex = filteredQuestions.findIndex(item => item.index === index);
+              if (filteredIndex !== -1) {
+                setReviewQuestionIndex(filteredIndex);
+              }
+              setShowReviewPalette(false);
+            }}
+            showMobile={showReviewPalette}
+            onCloseMobile={() => setShowReviewPalette(false)}
+            reviewMode={true}
+            questions={questions}
+          />
         </div>
       );
   }
@@ -865,7 +735,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       case 'current':
         return 'border-2 border-blue-500 bg-white text-stone-800 ring-2 ring-blue-300';
       case 'answered':
-        return 'bg-sky-400 text-white border-2 border-sky-400';
+        return 'bg-blue-400 text-white border-2 border-blue-400';
       case 'marked':
         return 'bg-amber-500 text-white border-2 border-amber-500';
       case 'not-answered':
@@ -876,34 +746,31 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-teal-50/30 to-stone-100 flex flex-col">
-      {/* Compact Header */}
+    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-orange-50/30 to-stone-100 flex flex-col">
+      {/* Compact Header - Sticky */}
       <div className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 py-3">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
           <div className="flex items-center justify-between">
-            {/* Left - Back & Title */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleSubmitClick}
-                className="p-2 hover:bg-stone-100 rounded-xl transition-all"
-              >
-                <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
+            {/* Left - Title */}
+            <div className="flex items-center gap-2">
+              <img
+                src="/images/logo.png"
+                alt="RailJee Logo"
+                className="h-8 sm:h-10 w-auto"
+              />
               <div>
-                <h1 className="text-sm font-bold text-stone-800">{exam.name}</h1>
-                <p className="text-xs text-stone-500">Q {currentQuestionIndex + 1}/{totalQuestions}</p>
+                <h1 className="text-xs sm:text-sm font-bold text-stone-800 leading-tight">{exam.name}</h1>
+                <p className="text-xxs sm:text-xs text-stone-500">Q {currentQuestionIndex + 1}/{totalQuestions}</p>
               </div>
             </div>
 
-            {/* Right - Timer, Grid Icon & Submit grouped together */}
-            <div className="flex items-center gap-2">
+            {/* Right - Timer, Grid Icon & Submit */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Timer */}
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+              <div className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xxs sm:text-xs font-bold ${
                 timeRemaining < 300 ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
               }`}>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>{formatTime(timeRemaining)}</span>
@@ -912,23 +779,23 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
               {/* Question Palette Toggle */}
               <button
                 onClick={() => setShowMobilePalette(true)}
-                className="p-2 hover:bg-stone-100 rounded-lg transition-all relative border border-stone-200"
+                className="p-1.5 sm:p-2 hover:bg-stone-100 rounded-lg transition-all relative border border-stone-200"
               >
-                <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
                   <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
                   <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
                   <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
                 </svg>
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-teal-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-orange-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {answeredCount}
                 </span>
               </button>
 
-              {/* Submit Button */}
+              {/* Submit Button - Hidden on mobile */}
               <button
                 onClick={handleSubmitClick}
-                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all"
+                className="hidden sm:flex px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold text-xs sm:text-sm hover:shadow-lg transition-all"
               >
                 Submit
               </button>
@@ -939,7 +806,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         {/* Progress Bar */}
         <div className="h-1 bg-stone-200">
           <div 
-            className="h-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-300"
             style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
           />
         </div>
@@ -948,10 +815,10 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex justify-center">
         {/* Question Area - Centered with wider max-width */}
-        <div className="w-full max-w-5xl p-4 lg:p-6">
+        <div className="w-full max-w-5xl p-3 sm:p-4 lg:p-6">
           <div className="w-full">
             {/* Use ExamQuestion Component */}
-            <div className="mb-4">
+            <div className="mb-3 sm:mb-4">
               <ExamQuestion
                 question={currentQuestion}
                 questionIndex={currentQuestionIndex}
@@ -960,17 +827,20 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
                 onSelectAnswer={handleSelectAnswer}
                 markedForReview={markedForReview[currentQuestionIndex]}
                 onToggleMarkForReview={handleToggleMarkForReview}
+                onSubmit={handleSubmitClick}
+                showSubmitButton={true}
+                practiceMode={examMode === 'practice'}
               />
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="bg-white rounded-2xl shadow-lg p-4">
-              <div className="flex items-center justify-between gap-3">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2 sm:gap-3">
                 {/* Previous Button */}
                 <button
                   onClick={handlePreviousQuestion}
                   disabled={currentQuestionIndex === 0}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-all font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-100 text-stone-700 rounded-lg sm:rounded-xl hover:bg-stone-200 transition-all font-semibold text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -981,14 +851,14 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
                 {/* Next/Submit Button */}
                 <button
                   onClick={currentQuestionIndex === totalQuestions - 1 ? handleSubmitClick : handleNextQuestion}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-semibold text-sm ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all font-semibold text-xs sm:text-sm ${
                     currentQuestionIndex === totalQuestions - 1
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-lg'
-                      : 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white hover:shadow-lg'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:shadow-lg'
+                      : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:shadow-lg'
                   }`}
                 >
                   <span>{currentQuestionIndex === totalQuestions - 1 ? 'Submit' : 'Next'}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>

@@ -1,24 +1,26 @@
+import Link from 'next/link';
 export default function Footer() {
   return (
-    <footer className="bg-stone-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-stone-900 text-white py-10 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-2xl font-bold">RailJee</span>
+            <div className="flex items-center space-x-2 mb-4 sm:mb-6">
+              <Link href="/" className="flex items-center space-x-2 group">
+                <img
+                  src="/images/logo.png"
+                  alt="RailJee Logo"
+                  className="h-12 sm:h-14 lg:h-16 w-auto transition-transform group-hover:scale-105"
+                />
+              </Link>
             </div>
-            <p className="text-stone-400 text-sm leading-relaxed mb-6">
+            <p className="text-stone-400 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">
               Your trusted platform for railway exam preparation. Join thousands of successful candidates.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-stone-700 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex gap-2 sm:gap-4">
+              <a href="#" className="w-8 h-8 sm:w-10 sm:h-10 bg-stone-800 rounded-full flex items-center justify-center hover:bg-stone-700 transition-colors">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                 </svg>
               </a>
@@ -37,42 +39,42 @@ export default function Footer() {
           
           {/* Exams */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-6">Exams</h3>
-            <ul className="space-y-4 text-stone-400">
-              <li><a href="#" className="hover:text-white transition-colors text-sm">RRB JE</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">NTPC</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Group D</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Jr. Clerk</a></li>
+            <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Exams</h3>
+            <ul className="space-y-2 sm:space-y-4 text-stone-400">
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">RRB JE</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">NTPC</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Group D</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Jr. Clerk</a></li>
             </ul>
           </div>
           
           {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-6">Resources</h3>
-            <ul className="space-y-4 text-stone-400">
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Study Notes</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Practice Tests</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Previous Papers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Syllabus</a></li>
+            <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Resources</h3>
+            <ul className="space-y-2 sm:space-y-4 text-stone-400">
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Study Notes</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Practice Tests</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Previous Papers</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Syllabus</a></li>
             </ul>
           </div>
           
           {/* Company */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-6">Company</h3>
-            <ul className="space-y-4 text-stone-400">
-              <li><a href="#" className="hover:text-white transition-colors text-sm">About Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Contact</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors text-sm">Terms of Service</a></li>
+            <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Company</h3>
+            <ul className="space-y-2 sm:space-y-4 text-stone-400">
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">About Us</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Contact</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-white transition-colors text-xs sm:text-sm">Terms of Service</a></li>
             </ul>
           </div>
         </div>
         
         {/* Bottom Bar */}
-        <div className="border-t border-stone-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-stone-500 text-sm">&copy; 2026 RailJee. All rights reserved.</p>
-          <p className="text-stone-500 text-sm">Made with ❤️ for Railway Aspirants</p>
+        <div className="border-t border-stone-800 mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+          <p className="text-stone-500 text-xs sm:text-sm">&copy; 2026 RailJee. All rights reserved.</p>
+          <p className="text-stone-500 text-xs sm:text-sm">Made with ❤️ for Railway Aspirants</p>
         </div>
       </div>
     </footer>

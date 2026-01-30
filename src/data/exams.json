@@ -85,16 +85,9 @@
       {
         "id": 3,
         "question": {
-          "en": "What is the maximum speed of Vande Bharat Express?",
           "hi": "वंदे भारत एक्सप्रेस की अधिकतम गति क्या है?"
         },
         "options": {
-          "en": [
-            "160 km/h",
-            "180 km/h",
-            "200 km/h",
-            "220 km/h"
-          ],
           "hi": [
             "160 किमी/घंटा",
             "180 किमी/घंटा",

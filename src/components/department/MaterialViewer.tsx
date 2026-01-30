@@ -77,7 +77,7 @@ export default function MaterialViewer({ material, onClose }: MaterialViewerProp
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors"
+            className="px-6 py-2 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition-colors"
           >
             Close
           </button>

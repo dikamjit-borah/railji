@@ -12,6 +12,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontSize: {
+        xxs: ['0.60rem', { lineHeight: '0.75rem' }],
+      },
     },
   },
   plugins: [],

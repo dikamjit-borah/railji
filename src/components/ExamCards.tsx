@@ -46,6 +46,7 @@ export default function ExamCards() {
   const [touchEnd, setTouchEnd] = useState(0);
   const [topExams, setTopExams] = useState<TopPaper[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Fetch top papers on mount
   useEffect(() => {
@@ -63,8 +64,20 @@ export default function ExamCards() {
     fetchData();
   }, []);
 
+  // Detect screen size for mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const totalSlides = topExams.length;
-  const visibleCards = 3;
+  const visibleCards = isMobile ? 1 : 3;
   const maxIndex = totalSlides - visibleCards;
 
   const handleStartExam = (examId: string) => {
@@ -112,18 +125,18 @@ export default function ExamCards() {
 
   if (loading) {
     return (
-      <section id="exams" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#faf9f7]">
+      <section id="exams" className="py-12 sm:py-16 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[#faf9f7]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 mb-6">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 lg:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-stone-900 mb-3 sm:mb-4 lg:mb-6">
               Choose Your Exam
             </h2>
-            <p className="text-lg text-stone-600 leading-relaxed">
+            <p className="text-sm sm:text-base text-stone-600 leading-relaxed px-4">
               Select from our top Railway Recruitment Board exam papers and start your preparation journey
             </p>
           </div>
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900"></div>
+          <div className="flex items-center justify-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-stone-900"></div>
           </div>
         </div>
       </section>
@@ -135,14 +148,14 @@ export default function ExamCards() {
   }
 
   return (
-    <section id="exams" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#faf9f7]">
+    <section id="exams" className="py-12 sm:py-16 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[#faf9f7]">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 mb-6">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 lg:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-stone-900 mb-3 sm:mb-4 lg:mb-6">
             Choose Your Exam
           </h2>
-          <p className="text-lg text-stone-600 leading-relaxed">
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed px-4">
             Select from our top Railway Recruitment Board exam papers and start your preparation journey
           </p>
         </div>
@@ -156,10 +169,10 @@ export default function ExamCards() {
               setIsAutoPlaying(false);
               setTimeout(() => setIsAutoPlaying(true), 5000);
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-300"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg border border-stone-200 items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-300"
             aria-label="Previous slide"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -170,17 +183,17 @@ export default function ExamCards() {
               setIsAutoPlaying(false);
               setTimeout(() => setIsAutoPlaying(true), 5000);
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-stone-200 flex items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-300"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg border border-stone-200 items-center justify-center text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-300"
             aria-label="Next slide"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
           {/* Cards Container */}
           <div 
-            className="overflow-hidden mx-6 lg:mx-8"
+            className="overflow-hidden mx-2 sm:mx-6 lg:mx-8"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -192,45 +205,46 @@ export default function ExamCards() {
               {topExams.map((exam, index) => (
                 <div
                   key={exam.id}
-                  className="w-full md:w-1/3 flex-shrink-0 px-3"
+                  className="w-full md:w-1/3 flex-shrink-0 px-2 sm:px-3"
+                  style={{ minWidth: isMobile ? '100%' : '33.333%' }}
                 >
                   <div
-                    className="group bg-white border border-stone-200 rounded-2xl p-6 hover:border-stone-300 hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                    className="group bg-white border border-stone-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 hover:border-stone-300 hover:shadow-xl transition-all duration-300 h-full flex flex-col"
                   >
                     {/* Header with Icon */}
-                    <div className="flex items-start justify-between mb-5">
-                      <div className="w-14 h-14 bg-stone-100 rounded-xl flex items-center justify-center text-stone-700 group-hover:bg-stone-900 group-hover:text-white transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4 sm:mb-5">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-stone-100 rounded-lg sm:rounded-xl flex items-center justify-center text-stone-700 group-hover:bg-stone-900 group-hover:text-white transition-all duration-300">
                         {examIcons[exam.id]}
                       </div>
                     </div>
 
                     {/* Department Tag */}
-                    <div className="mb-3">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-medium text-emerald-700">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mb-2 sm:mb-3">
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 bg-orange-50 border border-orange-200 rounded-full text-xs font-medium text-orange-700">
+                        <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         {exam.department}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-stone-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-2 group-hover:text-orange-600 transition-colors leading-tight">
                       {exam.name}
                     </h3>
-                    <p className="text-stone-600 text-sm mb-5 leading-relaxed flex-grow">
+                    <p className="text-stone-600 text-xs sm:text-sm mb-4 sm:mb-5 leading-relaxed flex-grow">
                       {exam.description}
                     </p>
                     
                     {/* Stats Row */}
-                    <div className="flex items-center gap-4 mb-5 text-sm">
-                      <div className="flex items-center gap-1.5 text-stone-500">
-                        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 text-xs sm:text-sm">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-stone-500">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{exam.duration} min</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-stone-500">
-                        <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-stone-500">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span>{exam.totalQuestions} Qs</span>
@@ -239,7 +253,7 @@ export default function ExamCards() {
                     
                     <button
                       onClick={() => handleStartExam(exam.id)}
-                      className="w-full px-5 py-3 rounded-full border-2 border-stone-900 text-stone-900 font-semibold text-sm hover:bg-stone-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                      className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border-2 border-stone-900 text-stone-900 font-semibold text-xs sm:text-sm hover:bg-stone-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group/btn"
                     >
                       Start Practice
                       <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +267,7 @@ export default function ExamCards() {
           </div>
 
           {/* Pagination Dots */}
-          <div className="flex justify-center items-center gap-2 mt-8">
+          <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-6 sm:mt-8">
             {Array.from({ length: maxIndex + 1 }).map((_, index) => (
               <button
                 key={index}
@@ -262,10 +276,10 @@ export default function ExamCards() {
                   setIsAutoPlaying(false);
                   setTimeout(() => setIsAutoPlaying(true), 5000);
                 }}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                   currentIndex === index 
-                    ? 'w-8 bg-stone-900' 
-                    : 'w-2 bg-stone-300 hover:bg-stone-400'
+                    ? 'w-6 sm:w-8 bg-stone-900' 
+                    : 'w-1.5 sm:w-2 bg-stone-300 hover:bg-stone-400'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -273,13 +287,13 @@ export default function ExamCards() {
           </div>
 
           {/* View All Link */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-8 lg:mt-10">
             <button
               onClick={() => router.push('/departments')}
-              className="inline-flex items-center gap-2 text-stone-700 font-medium hover:text-emerald-600 transition-colors group"
+              className="inline-flex items-center gap-2 text-stone-700 font-medium hover:text-orange-600 transition-colors group text-sm sm:text-base"
             >
               View All Exams
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
