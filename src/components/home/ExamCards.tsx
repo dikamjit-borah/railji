@@ -204,7 +204,7 @@ export default function ExamCards() {
             >
               {topExams.map((exam, index) => (
                 <div
-                  key={exam.id}
+                  key={exam._id}
                   className="w-full md:w-1/3 flex-shrink-0 px-2 sm:px-3"
                   style={{ minWidth: isMobile ? '100%' : '33.333%' }}
                 >
@@ -214,7 +214,7 @@ export default function ExamCards() {
                     {/* Header with Icon */}
                     <div className="flex items-start justify-between mb-4 sm:mb-5">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-stone-100 rounded-lg sm:rounded-xl flex items-center justify-center text-stone-700 group-hover:bg-stone-900 group-hover:text-white transition-all duration-300">
-                        {examIcons[exam.id]}
+                        {examIcons[exam.departmentId] || examIcons['je']}
                       </div>
                     </div>
 
@@ -252,7 +252,7 @@ export default function ExamCards() {
                     </div>
                     
                     <button
-                      onClick={() => handleStartExam(exam.id)}
+                      onClick={() => handleStartExam(exam._id)}
                       className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border-2 border-stone-900 text-stone-900 font-semibold text-xs sm:text-sm hover:bg-stone-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group/btn"
                     >
                       Start Practice

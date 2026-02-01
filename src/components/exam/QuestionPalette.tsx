@@ -1,23 +1,8 @@
 'use client';
 
-type QuestionStatus = 'current' | 'answered' | 'marked' | 'not-answered' | 'not-visited';
+import { Question } from '@/lib/types';
 
-interface Question {
-  id: number;
-  question: {
-    en: string;
-    hi: string;
-  };
-  options: {
-    en: string[];
-    hi: string[];
-  };
-  extras?: Array<{
-    en: string;
-    hi: string;
-  }>;
-  correctAnswer: number;
-}
+type QuestionStatus = 'current' | 'answered' | 'marked' | 'not-answered' | 'not-visited';
 
 interface QuestionPaletteProps {
   totalQuestions: number;
@@ -50,23 +35,6 @@ export default function QuestionPalette({
     if (markedForReview[index]) return 'marked';
     if (visitedQuestions.has(index)) return 'not-answered';
     return 'not-visited';
-  };
-
-  const getStatusColor = (status: QuestionStatus): string => {
-    switch (status) {
-      case 'current':
-        return 'bg-blue-500 text-white border-blue-600';
-      case 'answered':
-        return 'bg-blue-500 text-white';
-      case 'marked':
-        return 'bg-amber-500 text-white';
-      case 'not-answered':
-        return 'bg-red-500 text-white';
-      case 'not-visited':
-        return 'bg-stone-200 text-stone-600';
-      default:
-        return 'bg-stone-200 text-stone-600';
-    }
   };
 
   const answeredCount = answers.filter(a => a !== null).length;

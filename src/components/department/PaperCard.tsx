@@ -1,19 +1,6 @@
 'use client';
 
-interface ExamPaper {
-  id: string;
-  name: string;
-  description: string;
-  year: string;
-  shift: string;
-  questions: number;
-  duration: number;
-  attempts: number;
-  rating: number;
-  isFree: boolean;
-  isNew?: boolean;
-  examId: string;
-}
+import { ExamPaper } from '@/lib/types';
 
 interface PaperCardProps {
   paper: ExamPaper;
@@ -21,7 +8,8 @@ interface PaperCardProps {
   onSelect: (paper: ExamPaper) => void;
 }
 
-const formatAttempts = (num: number) => {
+const formatAttempts = (num: number | undefined) => {
+  if (!num) return '0';
   if (num >= 1000) {
     return (num / 1000).toFixed(1) + 'k';
   }

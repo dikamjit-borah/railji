@@ -2,20 +2,11 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-
-interface ExamPaper {
-  id: string;
-  name: string;
-  description: string;
-  year: string;
-  shift: string;
-  questions: number;
-  duration: number;
-}
+import { ExamPaper } from '@/lib/types';
 
 interface DepartmentHeaderProps {
   papers?: ExamPaper[];
-  onPaperSelect?: (paperId: string) => void;
+  onPaperSelect?: (paper: ExamPaper) => void;
 }
 
 export default function DepartmentHeader({ papers = [], onPaperSelect }: DepartmentHeaderProps) {
@@ -43,8 +34,8 @@ export default function DepartmentHeader({ papers = [], onPaperSelect }: Departm
     `${paper.year} ${paper.shift}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handlePaperClick = (paperId: string) => {
-    onPaperSelect?.(paperId);
+  const handlePaperClick = (paper: ExamPaper) => {
+    onPaperSelect?.(paper);
     setShowSearch(false);
     setSearchQuery('');
   };
@@ -83,7 +74,7 @@ export default function DepartmentHeader({ papers = [], onPaperSelect }: Departm
                     {filteredPapers.map((paper) => (
                       <button
                         key={paper.id}
-                        onClick={() => handlePaperClick(paper.id)}
+                        onClick={() => handlePaperClick(paper)}
                         className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-orange-50 transition-colors border-b border-stone-100 last:border-b-0"
                       >
                         <div className="flex items-start justify-between gap-2 sm:gap-3">

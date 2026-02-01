@@ -1,19 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-
-interface Question {
-  id: number;
-  question: {
-    en: string;
-    hi: string;
-  };
-  options: {
-    en: string[];
-    hi: string[];
-  };
-  correctAnswer: number;
-}
+import { Question } from '@/lib/types';
 
 interface ExamResultProps {
   exam: {

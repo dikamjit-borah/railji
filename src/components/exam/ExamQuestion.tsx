@@ -1,23 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-
-interface Question {
-  id: number;
-  question: {
-    en: string;
-    hi: string;
-  };
-  options: {
-    en: string[];
-    hi: string[];
-  };
-  extras?: Array<{
-    en: string;
-    hi: string;
-  }>;
-  correctAnswer: number;
-}
+import { Question } from '@/lib/types';
 
 interface ExamQuestionProps {
   question: Question;
@@ -32,6 +15,7 @@ interface ExamQuestionProps {
   onSubmit?: () => void;
   showSubmitButton?: boolean;
   practiceMode?: boolean;
+  isLocked?: boolean;
 }
 
 export default function ExamQuestion({
@@ -46,7 +30,8 @@ export default function ExamQuestion({
   correctAnswer,
   onSubmit,
   showSubmitButton = false,
-  practiceMode = false
+  practiceMode = false,
+  isLocked = false
 }: ExamQuestionProps) {
   const actualCorrectAnswer = correctAnswer ?? question.correctAnswer;
   const showFeedback = (practiceMode && selectedAnswer !== null) || reviewMode;
@@ -116,47 +101,47 @@ export default function ExamQuestion({
         <div className="flex-1 overflow-y-auto">
           {/* Question Text */}
           <div className="p-3 sm:p-4 lg:p-5 border-b border-stone-100">
-          {question.question.en && (
+          {question.questions.en && (
             <p className={`text-sm sm:text-base lg:text-lg font-semibold text-stone-800 leading-relaxed ${
-              question.question.hi ? 'mb-2 sm:mb-3' : ''
+              question.questions.hi ? 'mb-2 sm:mb-3' : ''
             }`}>
-              {question.question.en}
+              {question.questions.en}
             </p>
           )}
-          {question.question.hi && (
+          {question.questions.hi && (
             <p className="text-sm sm:text-base lg:text-lg text-stone-600 leading-relaxed rounded-lg font-hindi">
-              {question.question.hi}
+              {question.questions.hi}
             </p>
           )}
         </div>
 
-        {/* Extras Section - Collapsible & Compact */}
-        {question.extras && question.extras.length > 0 && (
+        {/* Details Section - Collapsible & Compact */}
+        {question.details && question.details.length > 0 && (
           <div className="border-b border-blue-100">
             {/* Collapsible Header */}
             
             
-            {/* Extras Content - Compact Grid */}
+            {/* Details Content - Compact Grid */}
             {(
               <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-b from-blue-50/30 to-transparent">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-2">
-                  {question.extras.map((extra, index) => (
+                  {question.details.map((detail, index) => (
                     <div 
                       key={index} 
                       className="bg-white rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 border border-blue-100 hover:border-blue-200 transition-colors"
                     >
                       <div className="flex gap-1.5 sm:gap-2">
                         <div className="min-w-0">
-                          {extra.en && (
+                          {detail.en && (
                             <p className={`text-xs sm:text-sm font-medium text-stone-700 leading-relaxed line-clamp-3 ${
-                              extra.hi ? 'mb-1.5 sm:mb-2' : ''
+                              detail.hi ? 'mb-1.5 sm:mb-2' : ''
                             }`}>
-                              {extra.en}
+                              {detail.en}
                             </p>
                           )}
-                          {extra.hi && (
+                          {detail.hi && (
                             <p className="text-xs sm:text-md text-stone-700 leading-relaxed line-clamp-3 font-hindi">
-                              {extra.hi}
+                              {detail.hi}
                             </p>
                           )}
                         </div>
@@ -171,7 +156,7 @@ export default function ExamQuestion({
 
         {/* Options */}
         <div className="p-3 sm:p-4 lg:p-5 space-y-2 sm:space-y-3">
-          {(question.options.en || question.options.hi).map((option, optIndex) => {
+          {question.options.map((option, optIndex) => {
             const optionLetter = String.fromCharCode(65 + optIndex);
             const isSelected = selectedAnswer === optIndex;
             const isCorrectOption = showFeedback && optIndex === actualCorrectAnswer;
@@ -197,13 +182,13 @@ export default function ExamQuestion({
               <button
                 key={optIndex}
                 onClick={() => onSelectAnswer(optIndex)}
-                disabled={reviewMode}
+                disabled={reviewMode || isLocked}
                 className={`w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
                   optionStyle
                 } ${
-                  !reviewMode && !isSelected && !showFeedback ? 'hover:border-orange-300 hover:bg-orange-50/30' : ''
+                  !reviewMode && !isSelected && !showFeedback && !isLocked ? 'hover:border-orange-300 hover:bg-orange-50/30' : ''
                 } ${
-                  reviewMode ? 'cursor-default' : ''
+                  reviewMode || isLocked ? 'cursor-default' : ''
                 }`}
               >
                 <div className="flex items-start gap-2.5 sm:gap-3 lg:gap-4">
@@ -213,18 +198,18 @@ export default function ExamQuestion({
                     {optionLetter}
                   </span>
                   <div className="flex-1 pt-0.5 sm:pt-1">
-                    {(question.options.en && question.options.en[optIndex]) && (
+                    {option.en && (
                       <p className={`text-xs sm:text-sm lg:text-base font-medium ${
-                        (question.options.hi && question.options.hi[optIndex]) ? 'mb-1' : ''
+                        option.hi ? 'mb-1' : ''
                       } ${
                         isCorrectOption ? 'text-yellow-800' : isWrongOption ? 'text-red-800' : isSelected && !reviewMode ? 'text-orange-800' : 'text-stone-700'
                       }`}>
-                        {question.options.en[optIndex]}
+                        {option.en}
                       </p>
                     )}
-                    {(question.options.hi && question.options.hi[optIndex]) && (
+                    {option.hi && (
                       <p className="text-xs sm:text-md lg:text-sm text-stone-600 font-hindi">
-                        {question.options.hi[optIndex]}
+                        {option.hi}
                       </p>
                     )}
                   </div>

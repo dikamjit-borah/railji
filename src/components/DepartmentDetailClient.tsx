@@ -1,8 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
+import { API_ENDPOINTS } from '@/lib/apiConfig';
+import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
+import LoadingState from './common/LoadingState';
+import ErrorScreen from './common/ErrorScreen';
 import DepartmentHeader from './department/DepartmentHeader';
 import DepartmentBanner from './department/DepartmentBanner';
 import TabNavigation from './department/TabNavigation';
@@ -11,64 +14,9 @@ import PaperCard from './department/PaperCard';
 import MaterialCard from './department/MaterialCard';
 import MaterialViewer from './department/MaterialViewer';
 
-interface ExamPaper {
-  id: string;
-  name: string;
-  description: string;
-  year: string;
-  shift: string;
-  questions: number;
-  duration: number;
-  attempts: number;
-  rating: number;
-  isFree: boolean;
-  isNew?: boolean;
-  subjects?: string[];
-  examId: string;
-}
-
-interface Material {
-  id: string;
-  name: string;
-  type: 'notes' | 'book' | 'video' | 'guide';
-  description: string;
-  downloads: number;
-  rating: number;
-  isFree: boolean;
-  contentType: 'pdf' | 'video';
-  contentUrl: string;
-}
-
-interface DepartmentInfo {
-  id: string;
-  name: string;
-  fullName: string;
-  color: {
-    gradient: string;
-    bg: string;
-  };
-}
-
-interface DepartmentData {
-  department: DepartmentInfo;
-  papers: ExamPaper[];
-  filters: {
-    examTypes: string[];
-    subjects: string[];
-  };
-}
-
 interface DepartmentDetailClientProps {
   deptId: string;
 }
-
-
-const formatAttempts = (num: number) => {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k';
-  }
-  return num.toString();
-};
 
 export default function DepartmentDetailClient({ deptId }: DepartmentDetailClientProps) {
   const router = useRouter();
@@ -98,21 +46,90 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/departments/${deptId}`);
+        // Fetch all departments from external API
+        const deptsResponse = await fetch(API_ENDPOINTS.DEPARTMENTS);
         
-        if (!response.ok) {
-          throw new Error(`Failed to fetch department data: ${response.statusText}`);
+        if (!deptsResponse.ok) {
+          throw new Error(`Failed to fetch departments: ${deptsResponse.statusText}`);
         }
         
-        const result = await response.json();
+        const deptsData = await deptsResponse.json();
         
-        if (!result.success || !result.data) {
-          throw new Error(result.error?.message || 'Failed to load department data');
+        // Map external API response to get departments array
+        const departments = Array.isArray(deptsData) ? deptsData : deptsData.data || deptsData.departments || [];
+        
+        // Find the matching department by slug/id
+        const currentDept = departments.find((dept: any) => 
+          dept.slug === deptId || 
+          dept.id === deptId ||
+          dept.departmentId === deptId
+        );
+        
+        if (!currentDept) {
+          throw new Error('Department not found');
         }
         
-        setDepartmentData(result.data);
+        // Get the external API department ID from the state
+        const externalDeptId = currentDept.departmentId || currentDept.id;
         
-        // Prefetch materials in the background after page loads
+        // Fetch papers from external API
+        const papersResponse = await fetch(API_ENDPOINTS.PAPERS(externalDeptId));
+        
+        if (!papersResponse.ok) {
+          throw new Error(`Failed to fetch papers: ${papersResponse.statusText}`);
+        }
+        
+        const papersData = await papersResponse.json();
+        
+        // Transform external API papers to match our interface
+        const transformedPapers: ExamPaper[] = papersData.data?.papers?.map((paper: any) => ({
+          id: paper.paperId || paper._id,
+          name: paper.name,
+          description: paper.description,
+          year: paper.year?.toString() || '2023',
+          shift: paper.shift || 'Morning',
+          questions: paper.totalQuestions || paper.questions || 100,
+          duration: paper.duration || 90,
+          attempts: Math.floor(Math.random() * 5000) + 1000,
+          rating: paper.rating || 4.0,
+          isFree: paper.isFree !== undefined ? paper.isFree : false,
+          isNew: paper.isNew || false,
+          subjects: [],
+          examId: paper.paperId || paper._id,
+          paperCode: paper.paperCode,
+          type: paper.type || paper.paperType,
+          zones: paper.zones,
+          examType: paper.examType,
+          totalQuestions: paper.totalQuestions,
+          passMarks: paper.passMarks,
+          negativeMarking: paper.negativeMarking
+        })) || [];
+        
+        // Extract unique exam types from papers
+        const examTypes = [...new Set(transformedPapers.map(p => p.examType || p.name).filter(Boolean))] as string[];
+        
+        // Map department data
+        const departmentInfo: DepartmentInfo = {
+          id: deptId,
+          name: currentDept.name || currentDept.departmentName,
+          fullName: currentDept.fullName || currentDept.name || currentDept.departmentName,
+          color: currentDept.color || {
+            gradient: 'from-orange-600 to-red-700',
+            bg: 'bg-orange-50'
+          },
+          departmentId: externalDeptId
+        };
+        
+        setDepartmentData({
+          department: departmentInfo,
+          papers: transformedPapers,
+          filters: {
+            examTypes: examTypes.length > 0 ? examTypes : [],
+            subjects: []
+          }
+        });
+        
+        // Prefetch materials in the background
         setTimeout(() => {
           fetchMaterials();
         }, 500);
@@ -180,7 +197,7 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
 
   const filteredPapers = useMemo(() => {
     const filtered = papers.filter(paper => {
-      const matchType = selectedExamType === 'All' || paper.name === selectedExamType;
+      const matchType = selectedExamType === 'All' || paper.name === selectedExamType || paper.examType === selectedExamType;
       const matchSubject = selectedSubject === 'All' || (paper.subjects && paper.subjects.includes(selectedSubject));
       return matchType && matchSubject;
     });
@@ -191,7 +208,9 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
         return a.name.localeCompare(b.name);
       } else {
         // Sort by date (year and shift)
-        const yearCompare = b.year.localeCompare(a.year);
+        const yearA = typeof a.year === 'string' ? a.year : a.year.toString();
+        const yearB = typeof b.year === 'string' ? b.year : b.year.toString();
+        const yearCompare = yearB.localeCompare(yearA);
         if (yearCompare !== 0) return yearCompare;
         return b.shift.localeCompare(a.shift);
       }
@@ -212,61 +231,24 @@ export default function DepartmentDetailClient({ deptId }: DepartmentDetailClien
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mb-4"></div>
-          <p className="text-stone-900 font-medium">Loading department data...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading department data..." />;
   }
 
   // Error state
   if (error || !department) {
     return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <svg className="w-16 h-16 text-red-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h2 className="text-2xl font-bold text-stone-900 mb-2">Failed to Load</h2>
-          <p className="text-stone-600 mb-6">{error || 'Department not found'}</p>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-orange-600 text-white rounded-xl font-medium hover:bg-orange-700 transition-all"
-            >
-              Try Again
-            </button>
-            <Link
-              href="/departments"
-              className="px-6 py-3 bg-stone-200 text-stone-900 rounded-xl font-medium hover:bg-stone-300 transition-all"
-            >
-              Go Back
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!department) {
-    return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-900 mb-4">Department not found</h1>
-          <Link href="/departments" className="text-orange-600 hover:underline">
-            Go back to departments
-          </Link>
-        </div>
-      </div>
+      <ErrorScreen
+        title="Failed to Load"
+        message={error || 'Department not found'}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 
   const handlePaperSelect = (paper: ExamPaper) => {
-    // Use examId directly from the paper object provided by API
-    router.push(`/exam/${paper.examId}`);
+    // Navigate with departmentId to avoid searching through all departments
+    const deptIdParam = departmentData?.department.departmentId || deptId;
+    router.push(`/exam/${paper.examId}?dept=${deptIdParam}`);
   };
 
   const handleTabChange = (tab: 'papers' | 'materials') => {
