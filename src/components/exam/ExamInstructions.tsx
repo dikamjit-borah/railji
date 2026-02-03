@@ -51,18 +51,11 @@ export default function ExamInstructions({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button className="p-1.5 sm:p-2 hover:bg-stone-100 rounded-lg sm:rounded-xl transition-colors">
-              <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-            </button>
-            <img
-              src="/images/logo.png"
-              alt="RailJee Logo"
-              className="h-10 sm:h-12 lg:h-14 w-auto"
-            />
-          </div>
+          <img
+            src="/images/logo.png"
+            alt="RailJee Logo"
+            className="h-10 sm:h-12 lg:h-14 w-auto"
+          />
         </div>
       </header>
 
@@ -206,19 +199,23 @@ export default function ExamInstructions({
                 <>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">1</span>
-                    <span>You must complete this test in one session - make sure your internet is reliable.</span>
+                    <span>This paper is objective type with one correct answer for each question.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">2</span>
-                    <span>1 mark awarded for a correct answer. Negative marking of -0.33 for each wrong answer.</span>
+                    <span>1 mark is awarded for each correct answer and 0.33 mark is deducted for each wrong answer.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">3</span>
-                    <span>More you give the correct answer more chance to win the badge.</span>
+                    <span>In case of any discrepancy between Hindi and English versions, the English version shall prevail.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">4</span>
-                    <span>If you don&apos;t earn a badge this time, you can retake this test once more.</span>
+                    <span>No marks will be awarded or deducted for unattempted questions.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center mt-0.5">5</span>
+                    <span>Once submitted, an answer cannot be modified.</span>
                   </li>
                 </>
               )}

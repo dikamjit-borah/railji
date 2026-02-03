@@ -50,6 +50,8 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   const [questionsPrefetched, setQuestionsPrefetched] = useState(false);
   const questionsCache = useRef<Question[]>([]);
   const hasFetchedExam = useRef(false);
+  const contentContainerRef = useRef<HTMLDivElement>(null);
+  const questionWrapperRef = useRef<HTMLDivElement>(null);
   
   // Result state from API
   const [submissionResult, setSubmissionResult] = useState<{
@@ -341,6 +343,27 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
     return () => clearInterval(timer);
   }, [hasStarted, showResult, timeRemaining]);
+
+  // Scroll to top when question changes
+  useEffect(() => {
+    if (hasStarted && !showResult) {
+      // Reset all possible scroll positions
+      // 1. Scroll window/document to top
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      
+      // 2. Reset main content container
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTop = 0;
+      }
+      
+      // 3. Reset question wrapper
+      if (questionWrapperRef.current) {
+        questionWrapperRef.current.scrollTop = 0;
+      }
+    }
+  }, [currentQuestionIndex, hasStarted, showResult]);
 
   // Prevent accidental navigation during exam
   useEffect(() => {
@@ -1032,10 +1055,10 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex justify-center">
+      <div className="flex-1 flex justify-center" ref={contentContainerRef}>
         {/* Question Area - Centered with wider max-width */}
         <div className="w-full max-w-5xl p-3 sm:p-4 lg:p-6">
-          <div className="w-full">
+          <div className="w-full" ref={questionWrapperRef}>
             {/* Use ExamQuestion Component */}
             <div className="mb-3 sm:mb-4">
               <ExamQuestion
