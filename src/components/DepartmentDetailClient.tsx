@@ -122,6 +122,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
               setGeneralDeptId(metadata.general.departmentId);
             }
           }
+        } else {
+          // If we already have the apiDeptId, still get currentDept from cache for display
+          currentDept = departmentCache.findDepartment(slug);
         }
         
         // Build API URL with paperCode parameter if filter is selected
@@ -129,10 +132,15 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         const deptIdForApi = (selectedSubject !== 'All' && generalDeptId) ? generalDeptId : apiDeptId;
         let papersUrl = API_ENDPOINTS.PAPERS(deptIdForApi);
         
-        if (selectedExamType !== 'All') {
-          papersUrl += `?paperCode=${selectedExamType}`;
-        } else if (selectedSubject !== 'All') {
-          papersUrl += `?paperCode=${selectedSubject}`;
+        if (selectedSubject !== 'All') {
+          // Subject filter: Show only "general" paperType papers
+          papersUrl += `?paperCode=${selectedSubject}&paperType=general`;
+        } else if (selectedExamType !== 'All') {
+          // Previous year filter: Show only "full" paperType papers
+          papersUrl += `?paperCode=${selectedExamType}&paperType=sectional`;
+        } else {
+          // Default (All): Show only "full" paperType papers
+          papersUrl += `?paperType=full`;
         }
         
         // Fetch papers from external API
@@ -331,8 +339,16 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   return (
     <div className="min-h-screen bg-[#faf9f7]">
       <DepartmentHeader 
-        papers={departmentData?.papers || []}
-        onPaperSelect={handlePaperSelect}
+        examTypes={availableExamTypes}
+        subjects={availableSubjects}
+        onExamTypeSelect={(type) => {
+          setSelectedExamType(type);
+          setSelectedSubject('All');
+        }}
+        onSubjectSelect={(subject) => {
+          setSelectedSubject(subject);
+          setSelectedExamType('All');
+        }}
       />
 
       <DepartmentBanner

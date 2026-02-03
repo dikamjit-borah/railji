@@ -41,6 +41,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   const [examMode, setExamMode] = useState<'exam' | 'practice' | null>(null);
   const [lockedQuestions, setLockedQuestions] = useState<boolean[]>([]);
   const [practiceAnswers, setPracticeAnswers] = useState<Map<number, number>>(new Map());
+  const [activeExamId, setActiveExamId] = useState<string | null>(null);
   
   // API state
   const [loading, setLoading] = useState(true);
@@ -376,10 +377,9 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       // Call start exam API to track exam start
       if (exam?.paperId && exam?.departmentId) {
         try {
-          // TODO: Replace with actual userId once authentication is implemented
-          const userId = '60f7b3b3b3b3b3b3b3b3b3b3'; // Placeholder userId
+          const userId = 'pramoduser';
           
-          await fetch(API_ENDPOINTS.START_EXAM, {
+          const startResponse = await fetch(API_ENDPOINTS.START_EXAM, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -391,7 +391,13 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
             }),
           });
           
-          console.log('Exam start tracked successfully');
+          if (startResponse.ok) {
+            const startData = await startResponse.json();
+            if (startData.success && startData.data?.examId) {
+              setActiveExamId(startData.data.examId);
+              console.log('Exam start tracked successfully, examId:', startData.data.examId);
+            }
+          }
         } catch (err) {
           // Non-blocking error - continue even if tracking fails
           console.error('Error tracking exam start:', err);
@@ -544,7 +550,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newAnswers = [...answers];
     if (selectedAnswer !== null) {
       newAnswers[currentQuestionIndex] = selectedAnswer;
@@ -585,6 +591,46 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       wrongAnswers: wrongAnswersCount,
       skipped: skippedCount
     });
+    
+    // Call submit API
+    if (exam && activeExamId) {
+      try {
+        const attemptedQuestions = newAnswers.filter(a => a !== null).length;
+        const unattemptedQuestions = totalQuestions - attemptedQuestions;
+        
+        // Format responses array
+        const responses = questions.map((question, index) => ({
+          questionId: question.id,
+          selectedOption: newAnswers[index] !== null ? newAnswers[index]! : -1, // Use -1 for unattempted
+          isFlagged: markedForReview[index] || false
+        }));
+        
+        const submitResponse = await fetch(API_ENDPOINTS.SUBMIT_EXAM, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            examId: activeExamId,
+            userId: 'pramoduser',
+            paperId: exam.paperId,
+            departmentId: exam.departmentId,
+            attemptedQuestions,
+            unattemptedQuestions,
+            responses
+          }),
+        });
+        
+        if (submitResponse.ok) {
+          const submitData = await submitResponse.json();
+          console.log('Exam submitted successfully:', submitData);
+        } else {
+          console.error('Failed to submit exam:', await submitResponse.text());
+        }
+      } catch (err) {
+        console.error('Error submitting exam:', err);
+      }
+    }
     
     // Save attempt to localStorage
     if (exam) {

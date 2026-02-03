@@ -2,14 +2,20 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-import { ExamPaper } from '@/lib/types';
 
 interface DepartmentHeaderProps {
-  papers?: ExamPaper[];
-  onPaperSelect?: (paper: ExamPaper) => void;
+  examTypes?: string[];
+  subjects?: string[];
+  onExamTypeSelect?: (examType: string) => void;
+  onSubjectSelect?: (subject: string) => void;
 }
 
-export default function DepartmentHeader({ papers = [], onPaperSelect }: DepartmentHeaderProps) {
+export default function DepartmentHeader({ 
+  examTypes = [], 
+  subjects = [], 
+  onExamTypeSelect,
+  onSubjectSelect 
+}: DepartmentHeaderProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
@@ -28,17 +34,28 @@ export default function DepartmentHeader({ papers = [], onPaperSelect }: Departm
     }
   }, [showSearch]);
 
-  const filteredPapers = papers.filter(paper =>
-    paper.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    paper.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    `${paper.year} ${paper.shift}`.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter exam types and subjects based on search query
+  const filteredExamTypes = examTypes.filter(type =>
+    type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const filteredSubjects = subjects.filter(subject =>
+    subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handlePaperClick = (paper: ExamPaper) => {
-    onPaperSelect?.(paper);
+  const handleExamTypeClick = (examType: string) => {
+    onExamTypeSelect?.(examType);
     setShowSearch(false);
     setSearchQuery('');
   };
+
+  const handleSubjectClick = (subject: string) => {
+    onSubjectSelect?.(subject);
+    setShowSearch(false);
+    setSearchQuery('');
+  };
+
+  const hasResults = filteredExamTypes.length > 0 || filteredSubjects.length > 0;
 
   return (
     <header className="pt-3 sm:pt-4 lg:pt-5 pb-2 sm:pb-3 px-3 sm:px-4 lg:px-8">
@@ -67,48 +84,71 @@ export default function DepartmentHeader({ papers = [], onPaperSelect }: Departm
               </div>
 
               {/* Search Dropdown */}
-              {showSearch && filteredPapers.length > 0 && (
+              {showSearch && hasResults && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 z-50 max-h-[400px] sm:max-h-[500px] overflow-y-auto">
-                  {/* Papers List */}
-                  <div className="py-1 sm:py-2">
-                    {filteredPapers.map((paper) => (
-                      <button
-                        key={paper.id}
-                        onClick={() => handlePaperClick(paper)}
-                        className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-orange-50 transition-colors border-b border-stone-100 last:border-b-0"
-                      >
-                        <div className="flex items-start justify-between gap-2 sm:gap-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-stone-800 text-xs sm:text-sm mb-1 truncate">{paper.name}</h4>
-                            <p className="text-xxs sm:text-xs text-stone-500 mb-1 line-clamp-1">{paper.description}</p>
-                            <div className="flex items-center gap-2 sm:gap-3 text-xxs sm:text-xs text-stone-400">
-                              <span className="flex items-center gap-0.5 sm:gap-1">
-                                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                {paper.year} • {paper.shift}
-                              </span>
-                              <span className="flex items-center gap-0.5 sm:gap-1">
-                                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                {paper.questions} Q
-                              </span>
-                              <span className="flex items-center gap-0.5 sm:gap-1">
-                                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {paper.duration}m
-                              </span>
+                  {/* Previous Year Filters */}
+                  {filteredExamTypes.length > 0 && (
+                    <div className="py-2">
+                      <div className="px-3 sm:px-4 py-1.5">
+                        <h3 className="text-xs sm:text-sm font-semibold text-stone-500 uppercase tracking-wide">Previous Year</h3>
+                      </div>
+                      <div className="space-y-0.5">
+                        {filteredExamTypes.map((examType) => (
+                          <button
+                            key={examType}
+                            onClick={() => handleExamTypeClick(examType)}
+                            className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-orange-50 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                </div>
+                                <span className="font-medium text-stone-800 text-sm sm:text-base">{examType}</span>
+                              </div>
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
                             </div>
-                          </div>
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400 flex-shrink-0 mt-0.5 sm:mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Subjects Filters */}
+                  {filteredSubjects.length > 0 && (
+                    <div className="py-2 border-t border-stone-200">
+                      <div className="px-3 sm:px-4 py-1.5">
+                        <h3 className="text-xs sm:text-sm font-semibold text-stone-500 uppercase tracking-wide">Subjects</h3>
+                      </div>
+                      <div className="space-y-0.5">
+                        {filteredSubjects.map((subject) => (
+                          <button
+                            key={subject}
+                            onClick={() => handleSubjectClick(subject)}
+                            className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-orange-50 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                  </svg>
+                                </div>
+                                <span className="font-medium text-stone-800 text-sm sm:text-base">{subject}</span>
+                              </div>
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
