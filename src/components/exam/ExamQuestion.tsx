@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { Question } from '@/lib/types';
 
 interface ExamQuestionProps {
@@ -35,6 +36,14 @@ export default function ExamQuestion({
 }: ExamQuestionProps) {
   const actualCorrectAnswer = correctAnswer ?? question.correctAnswer;
   const showFeedback = (practiceMode && selectedAnswer !== null) || reviewMode;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll position when question changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo(0, 0);
+    }
+  }, [questionIndex]);
 
   return (
     <div className="w-full flex flex-col max-h-[calc(100vh-180px)] sm:max-h-[calc(100vh-160px)]">
@@ -98,7 +107,7 @@ export default function ExamQuestion({
         </div>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" ref={scrollContainerRef}>
           {/* Question Text */}
           <div className="p-3 sm:p-4 lg:p-5 border-b border-stone-100">
           {question.questions.en && (
