@@ -12,7 +12,7 @@ interface ExamResultData {
   _id: string;
   examId: string;
   userId: string;
-  paperId: string;
+  paperName: string;
   departmentId: string;
   responses: Array<{
     questionId: number;
@@ -175,7 +175,7 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
   if (showQuestionReview && questions.length > 0) {
     return (
       <QuestionReview
-        examName={`Exam - ${resultData?.paperId || 'Exam'}`}
+        examName={`Exam - ${resultData?.paperName || 'Exam'}`}
         questions={questions}
         answers={getAnswersArray()}
         markedForReview={getMarkedForReview()}
@@ -205,7 +205,7 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
               </button>
               <div>
                 <h1 className="text-sm sm:text-base lg:text-lg font-bold text-stone-800">Exam Completed</h1>
-                <p className="text-xxs sm:text-xs text-stone-500">Paper ID: {resultData.paperId}</p>
+                <p className="text-xxs sm:text-xs text-stone-500">Paper: {resultData.paperName}</p>
               </div>
             </div>
           </div>

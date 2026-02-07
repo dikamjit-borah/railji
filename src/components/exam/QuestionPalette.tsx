@@ -55,9 +55,9 @@ export default function QuestionPalette({
       <div className="p-3 sm:p-4 lg:p-5 bg-stone-50 border-b border-stone-100">
         {reviewMode ? (
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="bg-yellow-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-yellow-400 flex flex-col items-center justify-center">
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">{correctCount}</p>
-              <p className="text-xxs sm:text-xs text-yellow-700 uppercase tracking-wide">Correct</p>
+            <div className="bg-green-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-green-500 flex flex-col items-center justify-center">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">{correctCount}</p>
+              <p className="text-xxs sm:text-xs text-green-700 uppercase tracking-wide">Correct</p>
             </div>
             <div className="bg-red-50 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-red-500 flex flex-col items-center justify-center">
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600">{wrongCount}</p>
@@ -107,8 +107,8 @@ export default function QuestionPalette({
               
               if (isCorrectAnswer) {
                 buttonStyle = isCurrent 
-                  ? 'border-2 border-yellow-400 bg-yellow-400 text-white ring-4 ring-blue-300'
-                  : 'border-2 border-yellow-400 bg-yellow-400 text-white';
+                  ? 'border-2 border-green-500 bg-green-500 text-white ring-4 ring-blue-300'
+                  : 'border-2 border-green-500 bg-green-500 text-white';
               } else if (isWrongAnswer) {
                 buttonStyle = isCurrent
                   ? 'border-2 border-red-500 bg-red-500 text-white ring-4 ring-blue-300'
@@ -162,7 +162,7 @@ export default function QuestionPalette({
         {reviewMode ? (
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-3 sm:mt-4 lg:mt-5 pt-3 sm:pt-4 border-t border-stone-100 text-xxs sm:text-xs">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-500 border-2 border-yellow-500"></div>
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500 border-2 border-green-500"></div>
               <span className="text-stone-600">Correct</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
