@@ -76,14 +76,14 @@ export default function QuestionReview({
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto py-6">
+      <main className="flex-1 overflow-y-auto py-2 pb-4">
         <div className="max-w-2xl mx-auto px-3 sm:px-4">
           {filteredQuestions.length === 0 ? (
             <EmptyFilterMessage filter={reviewFilter} />
           ) : (
             <>
               {/* Question Display */}
-              <div className="mb-4">
+              <div className="mb-2">
                 <ExamQuestion
                   question={reviewQuestion}
                   questionIndex={actualQuestionIndex}
@@ -134,7 +134,7 @@ interface ReviewHeaderProps {
 
 function ReviewHeader({ examName, onBack, onShowPalette }: ReviewHeaderProps) {
   return (
-    <div className="bg-white shadow-md sticky top-0 z-40">
+    <div className="shadow-md sticky top-0 z-40">
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -192,7 +192,7 @@ function FilterTabs({ activeFilter, filterCounts, onFilterChange }: FilterTabsPr
   ];
 
   return (
-    <div className="bg-white border-b border-stone-100">
+    <div>
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {filters.map(({ key, label, activeClass }) => (
@@ -246,12 +246,13 @@ interface ReviewNavigationProps {
 
 function ReviewNavigation({ currentIndex, totalFiltered, onPrevious, onNext }: ReviewNavigationProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
+        {/* Previous Button */}
         <button
           onClick={onPrevious}
           disabled={currentIndex === 0}
-          className="flex items-center gap-2 px-4 py-2.5 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-all font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-100 text-stone-700 rounded-lg sm:rounded-xl hover:bg-stone-200 transition-all font-semibold text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -259,13 +260,14 @@ function ReviewNavigation({ currentIndex, totalFiltered, onPrevious, onNext }: R
           <span className="hidden sm:inline">Previous</span>
         </button>
 
+        {/* Next Button */}
         <button
           onClick={onNext}
           disabled={currentIndex === totalFiltered - 1}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-semibold text-xs sm:text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <span>Next</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>

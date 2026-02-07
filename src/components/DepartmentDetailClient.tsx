@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
@@ -34,6 +34,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const [showGeneralDropdown, setShowGeneralDropdown] = useState(false);
   const [sortBy, setSortBy] = useState<'name' | 'date'>('date');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
   
   // API state
   const [departmentData, setDepartmentData] = useState<DepartmentData | null>(null);
@@ -46,6 +47,20 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const [externalDeptId, setExternalDeptId] = useState<string>('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [generalDeptId, setGeneralDeptId] = useState<string>('');
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setShowSortDropdown(false);
+      }
+    }
+
+    if (showSortDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSortDropdown]);
 
   // Fetch department data from API
   useEffect(() => {
@@ -465,7 +480,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                 <p className="text-stone-600 text-sm sm:text-base">
                   Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{filteredPapers.length}</span> {filteredPapers.length === 1 ? 'paper' : 'papers'}
                 </p>
-                <div className="hidden lg:flex items-center gap-3 text-stone-700 text-sm relative">
+                <div className="hidden lg:flex items-center gap-3 text-stone-700 text-sm relative" ref={sortDropdownRef}>
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
                     className="px-4 py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-2"
