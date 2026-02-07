@@ -7,6 +7,7 @@ import { Question, BilingualText } from '@/lib/types';
 import LoadingState from './common/LoadingState';
 import ErrorScreen from './common/ErrorScreen';
 import QuestionReview from './QuestionReview';
+import Navbar from './common/Navbar';
 
 interface ExamResultData {
   _id: string;
@@ -191,31 +192,11 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-100 via-orange-50/30 to-stone-100 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-md sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => router.push('/')}
-                className="p-1.5 hover:bg-stone-100 rounded-lg transition-all flex items-center justify-center"
-              >
-                <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </button>
-              <div>
-                <h1 className="text-sm sm:text-base font-bold text-stone-800">Exam Completed</h1>
-                <p className="text-xxs sm:text-xs text-stone-500">Paper: {resultData.paperName}</p>
-              </div>
-            </div>
-            <img
-              src="/images/logo.png"
-              alt="RailJee Logo"
-              className="h-8 sm:h-10 w-auto"
-            />
-          </div>
-        </div>
-      </div>
+      <Navbar
+        variant="examResult"
+        title="Exam Completed"
+        paperName={resultData.paperName}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto py-4 sm:py-5 lg:py-6">
@@ -352,30 +333,6 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
                 <div>
                   <p className="text-xs sm:text-sm text-stone-500">Accuracy</p>
                   <p className="font-bold text-stone-800 text-sm sm:text-base">{resultData.accuracy.toFixed(1)}%</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-stone-50 rounded-lg sm:rounded-xl">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-stone-500">Percentile</p>
-                  <p className="font-bold text-stone-800 text-sm sm:text-base">{resultData.percentile.toFixed(1)}%</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-stone-50 rounded-lg sm:rounded-xl">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-pink-100 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-stone-500">Max Score</p>
-                  <p className="font-bold text-stone-800 text-sm sm:text-base">{resultData.maxScore}</p>
                 </div>
               </div>
             </div>
