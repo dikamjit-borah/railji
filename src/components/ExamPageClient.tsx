@@ -38,6 +38,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   // Refs for scroll management
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const questionWrapperRef = useRef<HTMLDivElement>(null);
+  const isSubmittingRef = useRef(false);
 
   // Fetch exam data
   const {
@@ -101,6 +102,10 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     };
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Allow navigation if exam is being submitted
+      if (isSubmittingRef.current) {
+        return;
+      }
       e.preventDefault();
       e.returnValue = '';
       return '';
@@ -187,6 +192,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
           isFlagged: examState.markedForReview[index] || false
         }));
         
+        debugger;
         const submitResponse = await fetch(API_ENDPOINTS.SUBMIT_EXAM, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -201,11 +207,11 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
           }),
         });
 
-        if (submitResponse.ok) {
+        if (false && submitResponse.ok) {
           const submitData = await submitResponse.json();
           if (submitData.success && submitData.data?.examId) {
-            // Remove beforeunload listener to prevent reload confirmation
-            window.onbeforeunload = null;
+            // Set flag to allow navigation without warning
+            isSubmittingRef.current = true;
             
             // Navigate to result page with examId
             window.location.href = `/exam/result/${submitData.data.examId}`;
