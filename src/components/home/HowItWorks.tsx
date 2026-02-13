@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function HowItWorks() {
   const steps = [
     {
@@ -94,12 +96,12 @@ export default function HowItWorks() {
             Ready to advance your railway career?
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-            <a
+            <Link
               href="/departments"
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-stone-900 text-white font-semibold rounded-full hover:bg-stone-800 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               Start Practicing Now
-            </a>
+            </Link>
             <a
               href="#exams"
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-stone-900 font-semibold rounded-full border-2 border-stone-200 hover:border-stone-300 transition-all duration-300 text-sm sm:text-base"
