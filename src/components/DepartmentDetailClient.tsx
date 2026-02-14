@@ -74,7 +74,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   useEffect(() => {
     setPage(1);
     setHasMore(true);
-  }, [paperTypeFilter, selectedPaperCode]);
+  }, [paperTypeFilter, selectedPaperCode, sortBy]);
 
   // Fetch department data from API
   useEffect(() => {
@@ -150,15 +150,20 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         const deptIdForApi = (paperTypeFilter === 'general' && generalDeptId) ? generalDeptId : apiDeptId;
         let papersUrl = API_ENDPOINTS.PAPERS(deptIdForApi);
         
+        // Map sortBy value for API: 'date' -> 'updatedAt', 'name' -> 'name'
+        const apiSortBy = sortBy === 'date' ? 'updatedAt' : 'name';
+        // Map sortOrder: date uses desc (newest first), name uses asc (A-Z)
+        const sortOrder = sortBy === 'date' ? 'desc' : 'asc';
+        
         if (paperTypeFilter === 'general' && selectedPaperCode) {
           // General paper: common papers across departments
-          papersUrl += `?paperCode=${selectedPaperCode}&paperType=general&page=${page}`;
+          papersUrl += `?paperCode=${selectedPaperCode}&paperType=general&page=${page}&sortBy=${apiSortBy}&sortOrder=${sortOrder}`;
         } else if (paperTypeFilter === 'sectional' && selectedPaperCode) {
           // Sectional paper: section-wise breakdown by paper code
-          papersUrl += `?paperCode=${selectedPaperCode}&paperType=sectional&page=${page}`;
+          papersUrl += `?paperCode=${selectedPaperCode}&paperType=sectional&page=${page}&sortBy=${apiSortBy}&sortOrder=${sortOrder}`;
         } else {
           // Full paper (Previous Year): complete papers
-          papersUrl += `?paperType=full&page=${page}`;
+          papersUrl += `?paperType=full&page=${page}&sortBy=${apiSortBy}&sortOrder=${sortOrder}`;
         }
         
         // Fetch papers from external API
@@ -275,7 +280,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     };
 
     fetchDepartmentData();
-  }, [slug, paperTypeFilter, selectedPaperCode, page]);
+  }, [slug, paperTypeFilter, selectedPaperCode, page, sortBy]);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -375,20 +380,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   }, [availableSubjects]);
 
   const filteredPapers = useMemo(() => {
-    // Papers are already filtered by API, just apply sorting
-    return [...papers].sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      } else {
-        // Sort by date (year and shift)
-        const yearA = typeof a.year === 'string' ? a.year : a.year.toString();
-        const yearB = typeof b.year === 'string' ? b.year : b.year.toString();
-        const yearCompare = yearB.localeCompare(yearA);
-        if (yearCompare !== 0) return yearCompare;
-        return b.shift.localeCompare(a.shift);
-      }
-    });
-  }, [papers, sortBy]);
+    // Papers are already filtered and sorted by API
+    return papers;
+  }, [papers]);
 
   const materialTypeOptions = useMemo(() => {
     const types = [...new Set(materials.map(m => m.type))];
