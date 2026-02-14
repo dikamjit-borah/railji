@@ -188,7 +188,11 @@ export default function DepartmentsPage() {
   if (loading) {
     return (
       <>
-        <LoadingScreen isLoading={true} message="Loading departments..." />
+        <LoadingScreen 
+          isLoading={true} 
+          message="Loading departments..." 
+          animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+        />
         <div className="min-h-screen bg-[#faf9f7]" />
       </>
     );
@@ -261,7 +265,7 @@ export default function DepartmentsPage() {
             <img 
               src="/images/train-svg.svg" 
               alt="Train" 
-              className="h-10 sm:h-14 lg:h-16 w-auto mx-auto"
+              className="h-10 sm:h-14 lg:h-24 w-auto mx-auto"
               style={{
                 filter: 'brightness(0) saturate(100%) invert(27%) sepia(93%) saturate(2345%) hue-rotate(346deg) brightness(93%) contrast(101%)'
               }}

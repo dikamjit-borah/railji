@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
-import LoadingState from './common/LoadingState';
+import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import DepartmentHeader from './department/DepartmentHeader';
 import DepartmentBanner from './department/DepartmentBanner';
@@ -404,7 +404,11 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
 
   // Loading state
   if (loading) {
-    return <LoadingState message="Loading department data..." />;
+    return <LoadingScreen 
+      isLoading={true} 
+      message="Loading department data..." 
+      animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+    />;
   }
 
   // Error state

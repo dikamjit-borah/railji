@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { Question, BilingualText } from '@/lib/types';
-import LoadingState from './common/LoadingState';
+import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import QuestionReview from './QuestionReview';
 import Navbar from './common/Navbar';
@@ -155,7 +155,11 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
   };
 
   if (loading) {
-    return <LoadingState message="Loading exam results..." />;
+    return <LoadingScreen 
+      isLoading={true} 
+      message="Loading exam results..." 
+      animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+    />;
   }
 
   if (error) {

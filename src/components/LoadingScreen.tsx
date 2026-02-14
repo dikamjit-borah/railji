@@ -6,9 +6,14 @@ import { useEffect, useState } from 'react';
 interface LoadingScreenProps {
   isLoading: boolean;
   message?: string;
+  animationPath?: string;
 }
 
-export default function LoadingScreen({ isLoading, message = 'Loading...' }: LoadingScreenProps) {
+export default function LoadingScreen({ 
+  isLoading, 
+  message = 'Loading...',
+  animationPath = '/animation/Train Animation.lottie/a/Main Scene.json'
+}: LoadingScreenProps) {
   const [animationData, setAnimationData] = useState(null);
   const [animationLoaded, setAnimationLoaded] = useState(false);
 
@@ -17,7 +22,7 @@ export default function LoadingScreen({ isLoading, message = 'Loading...' }: Loa
     const loadAnimation = async () => {
       try {
         // Use preloaded resource (will be in cache if preload worked)
-        const response = await fetch('/animation/Train Animation.lottie/a/Main Scene.json', {
+        const response = await fetch(animationPath, {
           cache: 'force-cache'
         });
         const data = await response.json();
@@ -30,7 +35,7 @@ export default function LoadingScreen({ isLoading, message = 'Loading...' }: Loa
     };
 
     loadAnimation();
-  }, []);
+  }, [animationPath]);
 
   if (!isLoading) return null;
 

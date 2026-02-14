@@ -6,7 +6,7 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { ExamMode } from '@/lib/examTypes';
 import { getExamAttemptCount, getBestScore } from '@/lib/examStorage';
 import { useExamTimer, useExamData, useExamState, useExamSubmission } from '@/hooks';
-import LoadingState from './common/LoadingState';
+import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
 import ExamQuestion from './exam/ExamQuestion';
@@ -280,7 +280,11 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Render states
   if (loading) {
-    return <LoadingState message="Loading exam details..." />;
+    return <LoadingScreen 
+      isLoading={true} 
+      message="Loading exam details..." 
+      animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+    />;
   }
 
   if (error) {
@@ -326,7 +330,11 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     const storedResult = submission.getStoredResult();
     
     if (!storedResult) {
-      return <LoadingState message="Loading results..." />;
+      return <LoadingScreen 
+        isLoading={true} 
+        message="Loading results..." 
+        animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+      />;
     }
 
     if (showQuestionReview) {
