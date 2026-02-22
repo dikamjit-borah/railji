@@ -95,7 +95,7 @@ export interface UseExamSubmissionReturn {
     answers: (number | null)[],
     timeRemaining: number
   ) => SubmissionResult;
-  saveResultToStorage: (result: SubmissionResult) => void;
+  saveResultToStorage: (result: SubmissionResult) => Promise<void>;
   getStoredResult: () => SubmissionResult | null;
 }
 

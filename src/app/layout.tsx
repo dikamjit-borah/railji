@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Railjee - Railway Exam Platform",
   description: "Prepare for Railway exams with our comprehensive platform",
   icons: {
-    icon: "/images/logo - favicon.png",
+    icon: "/images/favicon.png",
   },
 };
 

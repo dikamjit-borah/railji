@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function Navbar() {
+interface NavbarProps {
+  user?: any;
+}
+
+export default function Navbar({ user }: NavbarProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -56,14 +60,31 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
+          {/* Auth/CTA Buttons */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <button
-              onClick={() => router.push('/departments')}
-              className="hidden sm:inline-flex px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all duration-300"
-            >
-              Start Preparing
-            </button>
+            {user ? (
+              <Link
+                href="/departments"
+                className="px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+              >
+                Go to Exams
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth/signin"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-full hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <button
