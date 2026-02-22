@@ -43,7 +43,7 @@ export default function ExamResult({
       {/* Result Badge */}
       <div className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 text-center mb-4 sm:mb-5 lg:mb-6 ${
         isPassed
-          ? 'bg-gradient-to-br from-yellow-500 to-orange-600'
+          ? 'bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600'
           : 'bg-gradient-to-br from-amber-500 to-orange-600'
       } text-white shadow-lg`}>
         <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 mx-auto mb-2 sm:mb-3 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
@@ -82,8 +82,8 @@ export default function ExamResult({
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-5 lg:mb-6">
         <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 shadow-sm border border-stone-100">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
