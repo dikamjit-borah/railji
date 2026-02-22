@@ -11,9 +11,7 @@ import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
 import ExamQuestion from './exam/ExamQuestion';
 import QuestionPalette from './exam/QuestionPalette';
-import ExamResult from './exam/ExamResult';
 import SubmitConfirmation from './exam/SubmitConfirmation';
-import QuestionReview from './QuestionReview';
 import ExamHeader from './exam/ExamHeader';
 import ExamActionBar from './exam/ExamActionBar';
 
@@ -27,9 +25,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Core state
   const [hasStarted, setHasStarted] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [examMode, setExamMode] = useState<ExamMode | null>(null);
-  const [showQuestionReview, setShowQuestionReview] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [activeExamId, setActiveExamId] = useState<string | null>(null);
@@ -60,7 +56,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   // Timer
   const timer = useExamTimer({
     initialTime: exam ? exam.duration * 60 : 0,
-    isActive: hasStarted && !showResult,
+    isActive: hasStarted,
     onTimeUp: handleSubmit
   });
 
@@ -78,7 +74,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Scroll to top when question changes
   useEffect(() => {
-    if (hasStarted && !showResult) {
+    if (hasStarted) {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -91,11 +87,11 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         questionWrapperRef.current.scrollTop = 0;
       }
     }
-  }, [examState.currentIndex, hasStarted, showResult]);
+  }, [examState.currentIndex, hasStarted]);
 
   // Prevent accidental navigation during exam
   useEffect(() => {
-    if (!hasStarted || showResult) return;
+    if (!hasStarted) return;
 
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
@@ -121,7 +117,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [hasStarted, showResult]);
+  }, [hasStarted]);
 
   // Handlers
   async function handleStartExam(mode: ExamMode) {
@@ -321,47 +317,6 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         bestScore={bestScore}
         onStartExam={handleStartExam}
         isStarting={isStarting}
-      />
-    );
-  }
-
-  // Post-exam result
-  if (showResult) {
-    const storedResult = submission.getStoredResult();
-    
-    if (!storedResult) {
-      return <LoadingScreen 
-        isLoading={true} 
-        message="Loading results..." 
-        animationPath="/animation/Trainbasic.lottie/a/Scene.json"
-      />;
-    }
-
-    if (showQuestionReview) {
-      return (
-        <QuestionReview
-          examName={exam.name}
-          questions={questions}
-          answers={examState.answers}
-          markedForReview={examState.markedForReview}
-          onBackToResult={() => setShowQuestionReview(false)}
-        />
-      );
-    }
-
-    return (
-      <ExamResult
-        exam={exam}
-        questions={questions}
-        answers={examState.answers}
-        score={storedResult.score}
-        percentage={storedResult.percentage}
-        passed={storedResult.percentage >= 40}
-        correctAnswers={storedResult.correctAnswers}
-        wrongAnswers={storedResult.wrongAnswers}
-        skipped={storedResult.skippedQuestions}
-        timeTaken={storedResult.timeTaken}
-        onReviewAnswers={() => setShowQuestionReview(true)}
       />
     );
   }

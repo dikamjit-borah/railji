@@ -260,7 +260,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
           duration: paper.duration || 90,
           totalQuestions: paper.totalQuestions || 100,
           passingMarks: paper.passMarks || 40,
-          passingPercentage: paper.passingPercentage,
+          passPercentage: paper.passPercentage,
           negativeMarking: paper.negativeMarking || 0.33,
           studentsAttempted: paper.usersAttempted || 0
         };

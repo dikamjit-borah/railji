@@ -12,7 +12,7 @@ interface ExamInstructionsProps {
     duration: number;
     totalQuestions: number;
     passingMarks: number;
-    passingPercentage?: number;
+    passPercentage?: number;
     negativeMarking?: number;
     instructions?: string[];
     studentsAttempted?: number;
@@ -135,7 +135,7 @@ export default function ExamInstructions({
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">40%</div>
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">{exam.passPercentage}%</div>
                 <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">For Badge / Passing Score</div>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function ExamInstructions({
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">-0.33</div>
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">{exam.negativeMarking}</div>
                 <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">Negative Marking per Wrong Answer</div>
               </div>
             </div>

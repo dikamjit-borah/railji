@@ -54,7 +54,7 @@ export interface Exam {
   duration: number;
   totalQuestions: number;
   passingMarks: number;
-  passingPercentage?: number;
+  passPercentage?: number;
   negativeMarking?: number;
   instructions?: string[];
   studentsAttempted?: number;

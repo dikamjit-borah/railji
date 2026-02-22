@@ -76,7 +76,7 @@ export default function QuestionReview({
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto py-2 pb-4">
+      <main className="flex-1 overflow-y-auto  pb-4">
         <div className="max-w-2xl mx-auto px-3 sm:px-4">
           {filteredQuestions.length === 0 ? (
             <EmptyFilterMessage filter={reviewFilter} />
@@ -192,7 +192,7 @@ function FilterTabs({ activeFilter, filterCounts, onFilterChange }: FilterTabsPr
   ];
 
   return (
-    <div>
+    <div className="sticky top-[60px] z-30">
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {filters.map(({ key, label, activeClass }) => (

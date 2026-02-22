@@ -54,6 +54,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const [loadingMore, setLoadingMore] = useState(false);
   const [totalPapersCount, setTotalPapersCount] = useState(0);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const papersContainerRef = useRef<HTMLDivElement>(null);
   const PAGE_SIZE = 12;
 
   // Close sort dropdown when clicking outside
@@ -74,7 +75,16 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   useEffect(() => {
     setPage(1);
     setHasMore(true);
-  }, [paperTypeFilter, selectedPaperCode, sortBy]);
+    
+    // Scroll to papers container to move sentinel out of view
+    // This prevents the infinite scroll from immediately triggering
+    if (papersContainerRef.current && !isInitialLoad) {
+      papersContainerRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  }, [paperTypeFilter, selectedPaperCode, sortBy, isInitialLoad]);
 
   // Fetch department data from API
   useEffect(() => {
@@ -511,7 +521,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
       />
 
       {/* Papers/Materials List */}
-      <main className="px-3 sm:px-4 lg:px-8 pb-8 sm:pb-10 lg:pb-12 relative">
+      <main className="px-3 sm:px-4 lg:px-8 pb-8 sm:pb-10 lg:pb-12 relative" ref={papersContainerRef}>
         <div className="max-w-7xl mx-auto">
           {activeTab === 'papers' ? (
             <>
