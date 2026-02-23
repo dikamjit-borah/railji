@@ -149,7 +149,7 @@ export default function FilterSection({
                       : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
                   }`}
                 >
-                  Others
+                  {paperTypeFilter === 'sectional' && otherExamTypes.includes(selectedPaperCode) ? selectedPaperCode : 'Others'}
                   <svg
                     className={`w-2.5 h-2.5 sm:w-3 sm:h-3 transition-transform duration-200 ${
                       showOthersDropdown ? 'rotate-180' : ''

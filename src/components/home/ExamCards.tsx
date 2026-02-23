@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { type TopPaper } from '@/lib/api';
+import { departmentCache } from '@/lib/departmentCache';
 
 // Function to get exam-specific icons based on multiple fields
 const getExamIcon = (exam: TopPaper): React.ReactNode => {
@@ -119,6 +120,17 @@ const getExamIcon = (exam: TopPaper): React.ReactNode => {
   // Use exam ID hash to consistently assign different icons
   const hash = exam._id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return fallbackIcons[hash % fallbackIcons.length];
+};
+
+// Resolve department name from cache by departmentId
+const getDepartmentName = (departmentId: string): string => {
+  if (!departmentId) return 'General';
+  const cached = departmentCache.get();
+  if (!cached) return 'General';
+  const dept = cached.departments.find((d: any) =>
+    d.departmentId === departmentId || d.id === departmentId || d.slug === departmentId
+  );
+  return dept?.name || dept?.departmentName || 'General';
 };
 
 interface ExamCardsProps {
@@ -331,7 +343,7 @@ export default function ExamCards({ dataReady = false, papers = [] }: ExamCardsP
                         <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                        {exam.examType}
+                        {getDepartmentName(exam.departmentId)}
                       </span>
                     </div>
 
@@ -359,7 +371,7 @@ export default function ExamCards({ dataReady = false, papers = [] }: ExamCardsP
                     </div>
                     
                     <button
-                      onClick={() => handleStartExam(exam._id, exam.departmentId)}
+                      onClick={() => handleStartExam(exam.paperId || exam._id, exam.departmentId)}
                       className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border-2 border-stone-900 text-stone-900 font-semibold text-xs sm:text-sm hover:bg-stone-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group/btn"
                     >
                       Start Practice

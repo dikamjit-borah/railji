@@ -55,6 +55,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const [totalPapersCount, setTotalPapersCount] = useState(0);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const papersContainerRef = useRef<HTMLDivElement>(null);
+  const isFetchingRef = useRef(false);
   const PAGE_SIZE = 12;
 
   // Close sort dropdown when clicking outside
@@ -71,23 +72,20 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     }
   }, [showSortDropdown]);
 
-  // Reset pagination when filters change
+  // Scroll to papers container when filters change (not on initial load)
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    
-    // Scroll to papers container to move sentinel out of view
-    // This prevents the infinite scroll from immediately triggering
     if (papersContainerRef.current && !isInitialLoad) {
       papersContainerRef.current.scrollIntoView({ 
         behavior: 'smooth', 
         block: 'start' 
       });
     }
-  }, [paperTypeFilter, selectedPaperCode, sortBy, isInitialLoad]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paperTypeFilter, selectedPaperCode, sortBy]);
 
   // Fetch department data from API
   useEffect(() => {
+    isFetchingRef.current = true;
     const fetchDepartmentData = async () => {
       const isLoadingMore = page > 1;
       try {
@@ -286,6 +284,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         setLoadingPapers(false);
         setLoadingMore(false);
         setIsInitialLoad(false);
+        isFetchingRef.current = false;
       }
     };
 
@@ -297,7 +296,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadingPapers && !loading) {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadingPapers && !loading && !isFetchingRef.current) {
           setPage((prev) => prev + 1);
         }
       },
@@ -443,6 +442,8 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     setActiveTab('papers');
     setPaperTypeFilter('full');
     setSelectedPaperCode('');
+    setPage(1);
+    setHasMore(true);
   };
 
   return (
@@ -453,14 +454,20 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         onExamTypeSelect={(type) => {
           setPaperTypeFilter('sectional');
           setSelectedPaperCode(type);
+          setPage(1);
+          setHasMore(true);
         }}
         onSubjectSelect={(subject) => {
           setPaperTypeFilter('general');
           setSelectedPaperCode(subject);
+          setPage(1);
+          setHasMore(true);
         }}
         onPreviousYearSelect={() => {
           setPaperTypeFilter('full');
           setSelectedPaperCode('');
+          setPage(1);
+          setHasMore(true);
         }}
       />
 
@@ -496,16 +503,22 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         onFullPaperClick={() => {
           setPaperTypeFilter('full');
           setSelectedPaperCode('');
+          setPage(1);
+          setHasMore(true);
           setShowOthersDropdown(false);
         }}
         onSectionalPaperSelect={(code) => {
           setPaperTypeFilter('sectional');
           setSelectedPaperCode(code);
+          setPage(1);
+          setHasMore(true);
           setShowOthersDropdown(false);
         }}
         onGeneralPaperSelect={(code) => {
           setPaperTypeFilter('general');
           setSelectedPaperCode(code);
+          setPage(1);
+          setHasMore(true);
         }}
         onToggleOthersDropdown={() => {
           setShowOthersDropdown(!showOthersDropdown);
@@ -561,6 +574,8 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                       <button
                         onClick={() => {
                           setSortBy('date');
+                          setPage(1);
+                          setHasMore(true);
                           setShowSortDropdown(false);
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
@@ -574,6 +589,8 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                       <button
                         onClick={() => {
                           setSortBy('name');
+                          setPage(1);
+                          setHasMore(true);
                           setShowSortDropdown(false);
                         }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
