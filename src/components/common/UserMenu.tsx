@@ -23,11 +23,13 @@ export default function UserMenu({ user }: UserMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
-  const displayName = 
-    user.user_metadata?.name || 
-    user.user_metadata?.full_name || 
-    user.email?.split('@')[0] || 
+  const fullName =
+    user.user_metadata?.name ||
+    user.user_metadata?.full_name ||
+    user.email?.split('@')[0] ||
     'User'
+
+  const displayName = fullName.split(' ')[0]
 
   useEffect(() => {
     // Fetch user profile from MongoDB
@@ -60,8 +62,10 @@ export default function UserMenu({ user }: UserMenuProps) {
 
   async function handleSignOut() {
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    // Hard redirect to clear the Next.js Router Cache so middleware
+    // re-evaluates auth state for all routes (client-side router.push
+    // can serve stale cached RSC payloads and bypass middleware).
+    window.location.href = '/'
   }
 
   return (
@@ -73,9 +77,9 @@ export default function UserMenu({ user }: UserMenuProps) {
         <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-orange-600 flex items-center justify-center text-white font-semibold text-sm">
           {displayName[0].toUpperCase()}
         </div>
-        <span className="hidden sm:block text-sm font-medium text-gray-700">
+        {/* <span className="hidden sm:block text-sm font-medium text-gray-700">
           {displayName}
-        </span>
+        </span> */}
         <svg 
           className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
           fill="none" 
@@ -89,7 +93,6 @@ export default function UserMenu({ user }: UserMenuProps) {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm font-semibold text-gray-900">{displayName}</p>
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
             {userProfile?.department && (
               <p className="text-xs text-blue-600 mt-1 font-medium">
@@ -100,6 +103,17 @@ export default function UserMenu({ user }: UserMenuProps) {
 
           <div className="py-1">
             <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              My Profile
+            </Link>
+
+            <Link
               href="/stats"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -108,17 +122,6 @@ export default function UserMenu({ user }: UserMenuProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               My Statistics
-            </Link>
-
-            <Link
-              href="/departments"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              All Departments
             </Link>
 
             {userProfile?.examHistory?.length > 0 && (

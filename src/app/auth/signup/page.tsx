@@ -25,16 +25,14 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          data: {
-            name,
-          },
+          data: { name },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
       if (signUpError) throw signUpError
 
-      // 2. Create user profile in MongoDB
+      // 2. Create user profile in MongoDB via /api/users/create
       if (data.user) {
         const response = await fetch('/api/users/create', {
           method: 'POST',
@@ -50,7 +48,6 @@ export default function SignUpPage() {
           throw new Error('Failed to create user profile')
         }
 
-        // Show success message
         alert('Please check your email to verify your account!')
         router.push('/auth/signin')
       }
@@ -101,6 +98,7 @@ export default function SignUpPage() {
             {error}
           </div>
         )}
+
 
         <form onSubmit={handleSignUp} className="space-y-5">
           <div>

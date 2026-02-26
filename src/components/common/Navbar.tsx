@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import UserMenu from '@/components/common/UserMenu';
 
 export type NavbarVariant = 'home' | 'departments' | 'stats' | 'departmentDetail' | 'examResult';
 
@@ -25,6 +27,14 @@ export default function Navbar({
 }: NavbarProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+  }, []);
 
   // Home variant - Full navbar with navigation
   if (variant === 'home') {
@@ -56,13 +66,16 @@ export default function Navbar({
                 </p>
               </div>
             </Link>
-            <Link href="/" className="transition-transform hover:scale-105">
-              <img
-                src="/images/logo.png"
-                alt="RailJee Logo"
-                className="h-8 sm:h-10 lg:h-12 w-auto"
-              />
-            </Link>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {user && <UserMenu user={user} />}
+              <Link href="/" className="transition-transform hover:scale-105">
+                <img
+                  src="/images/logo.png"
+                  alt="RailJee Logo"
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
+                />
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -86,20 +99,21 @@ export default function Navbar({
               </button>
               <div>
                 <h1 className="text-lg font-bold text-stone-900">
-                  {title || 'Your Statistics'}
+                  {title || 'My Statistics'}
                 </h1>
                 <p className="text-xs text-stone-500">
                   {subtitle || 'Track your exam performance'}
                 </p>
               </div>
             </div>
-            {statsInfo && (
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {statsInfo && (
                 <span className="text-xs text-stone-500 hidden sm:block">
                   {statsInfo}
                 </span>
-              </div>
-            )}
+              )}
+              {user && <UserMenu user={user} />}
+            </div>
           </div>
         </div>
       </header>
@@ -118,17 +132,20 @@ export default function Navbar({
                 <p className="text-xxs sm:text-xs text-stone-500">{subtitle || (paperName ? `Paper: ${paperName}` : '')}</p>
               </div>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              aria-label="Go to home"
-            >
-              <img
-                src="/images/logo.png"
-                alt="RailJee Logo"
-                className="h-8 sm:h-10 w-auto"
-              />
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {user && <UserMenu user={user} />}
+              <button
+                onClick={() => router.push('/')}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                aria-label="Go to home"
+              >
+                <img
+                  src="/images/logo.png"
+                  alt="RailJee Logo"
+                  className="h-8 sm:h-10 w-auto"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </header>

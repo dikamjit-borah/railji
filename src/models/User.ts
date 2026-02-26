@@ -77,9 +77,7 @@ const UserSchema = new Schema<IUser>(
   }
 )
 
-// Indexes for faster queries
-UserSchema.index({ supabaseId: 1 })
-UserSchema.index({ email: 1 })
+// Additional index for department filtering (supabaseId and email are indexed via schema field options)
 UserSchema.index({ department: 1 })
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema)

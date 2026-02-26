@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import UserMenu from '@/components/common/UserMenu';
 
 interface DepartmentHeaderProps {
   examTypes?: string[];
@@ -21,6 +23,14 @@ export default function DepartmentHeader({
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -184,11 +194,12 @@ export default function DepartmentHeader({
                 </div>
               )}
             </div>
+            {user && <UserMenu user={user} />}
             <Link href="/" className="transition-transform hover:scale-105">
               <img
                 src="/images/logo.png"
                 alt="RailJee Logo"
-                className="h-10 sm:h-12 lg:h-14 w-auto"
+                className="h-10 sm:h-12 w-auto"
               />
             </Link>
           </div>

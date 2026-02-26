@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import UserMenu from '@/components/common/UserMenu';
 
 interface ExamInstructionsProps {
   exam: {
@@ -12,7 +14,7 @@ interface ExamInstructionsProps {
     duration: number;
     totalQuestions: number;
     passingMarks: number;
-    passingPercentage?: number;
+    passPercentage?: number;
     negativeMarking?: number;
     instructions?: string[];
     studentsAttempted?: number;
@@ -40,6 +42,14 @@ export default function ExamInstructions({
 }: ExamInstructionsProps) {
   const router = useRouter();
   const [selectedMode, setSelectedMode] = useState<'exam' | 'practice' | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#faf9f7] flex flex-col">
@@ -54,13 +64,16 @@ export default function ExamInstructions({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <img
-              src="/images/logo.png"
-              alt="RailJee Logo"
-              className="h-8 sm:h-10 w-auto"
-            />
-          </Link>
+          <div className="flex items-center gap-2">
+            {user && <UserMenu user={user} />}
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <img
+                src="/images/logo.png"
+                alt="RailJee Logo"
+                className="h-8 sm:h-10 w-auto"
+              />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -135,7 +148,7 @@ export default function ExamInstructions({
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">40%</div>
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">{exam.passPercentage}%</div>
                 <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">For Badge / Passing Score</div>
               </div>
             </div>
@@ -148,7 +161,7 @@ export default function ExamInstructions({
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">-0.33</div>
+                <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">{exam.negativeMarking}</div>
                 <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">Negative Marking per Wrong Answer</div>
               </div>
             </div>

@@ -1,7 +1,24 @@
+// TEMPORARY: Stores users in a local JSON file instead of MongoDB
 import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
-import User from '@/models/User'
+import { readFile, writeFile } from 'fs/promises'
+import path from 'path'
 
+const DB_PATH = path.join(process.cwd(), 'tmp-users.json')
+
+async function readUsers(): Promise<any[]> {
+  try {
+    const raw = await readFile(DB_PATH, 'utf-8')
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
+}
+
+async function writeUsers(users: any[]): Promise<void> {
+  await writeFile(DB_PATH, JSON.stringify(users, null, 2), 'utf-8')
+}
+
+// POST /api/users/create
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -9,37 +26,40 @@ export async function POST(request: Request) {
 
     if (!supabaseId || !email || !name) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: supabaseId, email, name' },
         { status: 400 }
       )
     }
 
-    await connectDB()
+    const users = await readUsers()
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ supabaseId })
-    if (existingUser) {
+    // Return existing user (idempotent)
+    const existing = users.find((u) => u.supabaseId === supabaseId)
+    if (existing) {
       return NextResponse.json(
-        { success: true, userId: existingUser._id, message: 'User already exists' },
+        { success: true, userId: existing.id, message: 'User already exists' },
         { status: 200 }
       )
     }
 
-    // Create new user in MongoDB
-    const user = await User.create({
+    const newUser = {
+      id: `local_${Date.now()}`,
       supabaseId,
-      email,
-      name,
-      ...(department && { department }),
+      email: email.toLowerCase().trim(),
+      name: name.trim(),
+      department: department || null,
       examHistory: [],
-      lastActive: new Date(),
-    })
+      createdAt: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+    }
 
-    return NextResponse.json({
-      success: true,
-      userId: user._id,
-      message: 'User created successfully',
-    })
+    users.push(newUser)
+    await writeUsers(users)
+
+    return NextResponse.json(
+      { success: true, userId: newUser.id, message: 'User created successfully' },
+      { status: 201 }
+    )
   } catch (error: any) {
     console.error('Error creating user:', error)
     return NextResponse.json(

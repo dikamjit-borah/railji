@@ -11,11 +11,23 @@ import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
 import ExamQuestion from './exam/ExamQuestion';
 import QuestionPalette from './exam/QuestionPalette';
-import ExamResult from './exam/ExamResult';
 import SubmitConfirmation from './exam/SubmitConfirmation';
-import QuestionReview from './QuestionReview';
 import ExamHeader from './exam/ExamHeader';
 import ExamActionBar from './exam/ExamActionBar';
+
+const PENDING_SUBMISSION_KEY = 'pending_exam_submission';
+
+interface PendingSubmission {
+  examId: string;
+  activeExamId: string;
+  paperId: string;
+  departmentId: string;
+  answers: (number | null)[];
+  markedForReview: boolean[];
+  timeRemaining: number;
+  questionIds: number[];
+  totalQuestions: number;
+}
 
 interface ExamPageClientProps {
   examId: string;
@@ -27,9 +39,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Core state
   const [hasStarted, setHasStarted] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [examMode, setExamMode] = useState<ExamMode | null>(null);
-  const [showQuestionReview, setShowQuestionReview] = useState(false);
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [activeExamId, setActiveExamId] = useState<string | null>(null);
@@ -60,7 +70,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   // Timer
   const timer = useExamTimer({
     initialTime: exam ? exam.duration * 60 : 0,
-    isActive: hasStarted && !showResult,
+    isActive: hasStarted,
     onTimeUp: handleSubmit
   });
 
@@ -78,7 +88,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Scroll to top when question changes
   useEffect(() => {
-    if (hasStarted && !showResult) {
+    if (hasStarted) {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -91,11 +101,71 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         questionWrapperRef.current.scrollTop = 0;
       }
     }
-  }, [examState.currentIndex, hasStarted, showResult]);
+  }, [examState.currentIndex, hasStarted]);
+
+  // Check for pending submission on mount (after reload)
+  useEffect(() => {
+    const pendingRaw = sessionStorage.getItem(PENDING_SUBMISSION_KEY);
+    if (!pendingRaw) return;
+
+    // Remove immediately to prevent re-processing
+    sessionStorage.removeItem(PENDING_SUBMISSION_KEY);
+
+    try {
+      const pending: PendingSubmission = JSON.parse(pendingRaw);
+
+      // Only process if it matches the current exam
+      if (pending.examId !== examId) return;
+
+      // Auto-submit the exam
+      setIsSubmitting(true);
+
+      const attempted = pending.answers.filter((a) => a !== null).length;
+      const unattempted = pending.totalQuestions - attempted;
+
+      const responses = pending.questionIds.map((qId, index) => ({
+        questionId: qId,
+        selectedOption: pending.answers[index] !== null ? pending.answers[index]! : -1,
+        isFlagged: pending.markedForReview[index] || false,
+      }));
+
+      fetch(API_ENDPOINTS.SUBMIT_EXAM, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          examId: pending.activeExamId,
+          userId: 'pramoduser',
+          paperId: pending.paperId,
+          departmentId: pending.departmentId,
+          attemptedQuestions: attempted,
+          unattemptedQuestions: unattempted,
+          responses,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Submit failed');
+          return res.json();
+        })
+        .then((data) => {
+          if (data.success && data.data?.examId) {
+            window.location.href = `/exam/result/${data.data.examId}`;
+          } else {
+            throw new Error('Invalid submit response');
+          }
+        })
+        .catch((err) => {
+          console.error('Error auto-submitting exam after reload:', err);
+          setIsSubmitting(false);
+          alert('Failed to submit exam after reload. Please try again.');
+        });
+    } catch (err) {
+      console.error('Error parsing pending submission:', err);
+    }
+  }, [examId]);
 
   // Prevent accidental navigation during exam
   useEffect(() => {
-    if (!hasStarted || showResult) return;
+    if (!hasStarted) return;
 
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
@@ -108,6 +178,26 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       if (isSubmittingRef.current) {
         return;
       }
+
+      // Save current exam state so it can be submitted after reload
+      if (exam && activeExamId && questions.length > 0 && exam.paperId && exam.departmentId) {
+        const pendingData: PendingSubmission = {
+          examId,
+          activeExamId,
+          paperId: exam.paperId,
+          departmentId: exam.departmentId,
+          answers: examState.answers,
+          markedForReview: examState.markedForReview,
+          timeRemaining: timer.timeRemaining,
+          questionIds: questions.map((q) => q.id),
+          totalQuestions: questions.length,
+        };
+        sessionStorage.setItem(
+          PENDING_SUBMISSION_KEY,
+          JSON.stringify(pendingData)
+        );
+      }
+
       e.preventDefault();
       e.returnValue = '';
       return '';
@@ -121,7 +211,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [hasStarted, showResult]);
+  }, [hasStarted, exam, activeExamId, questions, examState.answers, examState.markedForReview, timer.timeRemaining, examId]);
 
   // Handlers
   async function handleStartExam(mode: ExamMode) {
@@ -279,6 +369,15 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   }
 
   // Render states
+  if (isSubmitting && !hasStarted) {
+    // Auto-submitting after reload
+    return <LoadingScreen
+      isLoading={true}
+      message="Submitting your exam..."
+      animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+    />;
+  }
+
   if (loading) {
     return <LoadingScreen 
       isLoading={true} 
@@ -321,47 +420,6 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         bestScore={bestScore}
         onStartExam={handleStartExam}
         isStarting={isStarting}
-      />
-    );
-  }
-
-  // Post-exam result
-  if (showResult) {
-    const storedResult = submission.getStoredResult();
-    
-    if (!storedResult) {
-      return <LoadingScreen 
-        isLoading={true} 
-        message="Loading results..." 
-        animationPath="/animation/Trainbasic.lottie/a/Scene.json"
-      />;
-    }
-
-    if (showQuestionReview) {
-      return (
-        <QuestionReview
-          examName={exam.name}
-          questions={questions}
-          answers={examState.answers}
-          markedForReview={examState.markedForReview}
-          onBackToResult={() => setShowQuestionReview(false)}
-        />
-      );
-    }
-
-    return (
-      <ExamResult
-        exam={exam}
-        questions={questions}
-        answers={examState.answers}
-        score={storedResult.score}
-        percentage={storedResult.percentage}
-        passed={storedResult.percentage >= 40}
-        correctAnswers={storedResult.correctAnswers}
-        wrongAnswers={storedResult.wrongAnswers}
-        skipped={storedResult.skippedQuestions}
-        timeTaken={storedResult.timeTaken}
-        onReviewAnswers={() => setShowQuestionReview(true)}
       />
     );
   }
