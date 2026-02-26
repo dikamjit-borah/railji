@@ -474,7 +474,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
       <DepartmentBanner
         department={department}
         activeTab={activeTab}
-        filteredCount={activeTab === 'papers' ? filteredPapers.length : filteredMaterials.length}
+        filteredCount={activeTab === 'papers' ? totalPapersCount : filteredMaterials.length}
       />
 
       <div className="px-3 sm:px-4 lg:px-8 pb-4 sm:pb-6 lg:pb-8">

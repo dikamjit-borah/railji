@@ -55,7 +55,11 @@ export default function PaperCard({ paper, index, onSelect }: PaperCardProps) {
 
       {/* Title & Price Row */}
       <div className="flex items-start justify-between gap-2 sm:gap-3 mb-1.5 sm:mb-2">
-        <h3 className="text-base sm:text-lg font-bold text-stone-900 leading-tight group-hover:text-orange-700 transition-colors">
+        <h3
+          className="text-base sm:text-lg font-bold text-stone-900 leading-tight group-hover:text-orange-700 transition-colors truncate"
+          style={{ maxWidth: '100%' }}
+          title={paper.name}
+        >
           {paper.name}
         </h3>
         <div className="text-right flex-shrink-0">
@@ -67,7 +71,11 @@ export default function PaperCard({ paper, index, onSelect }: PaperCardProps) {
       </div>
 
       {/* Description */}
-      <p className="text-stone-500 text-xxs sm:text-xs mb-2 sm:mb-3 line-clamp-2">
+      <p
+        className="text-stone-500 text-xxs sm:text-xs mb-2 sm:mb-3 line-clamp-2 overflow-hidden text-ellipsis"
+        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+        title={paper.description}
+      >
         {paper.description}
       </p>
 

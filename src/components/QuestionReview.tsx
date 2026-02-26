@@ -186,7 +186,7 @@ interface FilterTabsProps {
 function FilterTabs({ activeFilter, filterCounts, onFilterChange }: FilterTabsProps) {
   const filters: { key: ReviewFilter; label: string; activeClass: string }[] = [
     { key: 'all', label: 'All', activeClass: 'bg-stone-800 text-white' },
-    { key: 'correct', label: 'Correct', activeClass: 'bg-yellow-500 text-white' },
+    { key: 'correct', label: 'Correct', activeClass: 'bg-green-500 text-white' },
     { key: 'wrong', label: 'Wrong', activeClass: 'bg-red-500 text-white' },
     { key: 'skipped', label: 'Skipped', activeClass: 'bg-amber-500 text-white' }
   ];
