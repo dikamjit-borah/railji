@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
@@ -18,8 +17,8 @@ interface UserMenuProps {
 
 export default function UserMenu({ user }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [userProfile, setUserProfile] = useState<any>(null)
-  const router = useRouter()
   const menuRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -50,7 +49,7 @@ export default function UserMenu({ user }: UserMenuProps) {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        if (!signingOut) setIsOpen(false)
       }
     }
 
@@ -58,13 +57,11 @@ export default function UserMenu({ user }: UserMenuProps) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen])
+  }, [isOpen, signingOut])
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    // Hard redirect to clear the Next.js Router Cache so middleware
-    // re-evaluates auth state for all routes (client-side router.push
-    // can serve stale cached RSC payloads and bypass middleware).
+  function handleSignOut() {
+    setSigningOut(true)
+    supabase.auth.signOut()
     window.location.href = '/'
   }
 
@@ -77,13 +74,10 @@ export default function UserMenu({ user }: UserMenuProps) {
         <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-orange-600 flex items-center justify-center text-white font-semibold text-sm">
           {displayName[0].toUpperCase()}
         </div>
-        {/* <span className="hidden sm:block text-sm font-medium text-gray-700">
-          {displayName}
-        </span> */}
-        <svg 
-          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -94,11 +88,6 @@ export default function UserMenu({ user }: UserMenuProps) {
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            {userProfile?.department && (
-              <p className="text-xs text-blue-600 mt-1 font-medium">
-                {userProfile.department} Department
-              </p>
-            )}
           </div>
 
           <div className="py-1">
@@ -134,12 +123,20 @@ export default function UserMenu({ user }: UserMenuProps) {
           <div className="border-t border-gray-100 mt-1 pt-1">
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              disabled={signingOut}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign Out
+              {signingOut ? (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              )}
+              {signingOut ? 'Signing out...' : 'Sign Out'}
             </button>
           </div>
         </div>

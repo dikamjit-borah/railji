@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useNavigation } from '@/components/NavigationProvider';
 
 export default function Hero() {
-  const router = useRouter();
+  const { navigate } = useNavigation();
 
   return (
     <section className="relative py-8 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#faf9f7]">
@@ -36,7 +36,7 @@ export default function Hero() {
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
-                onClick={() => router.push('/departments')}
+                onClick={() => navigate('/departments')}
                 className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-stone-900 text-white font-semibold rounded-full hover:bg-stone-800 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
               >
                 Get started

@@ -22,7 +22,7 @@ async function writeUsers(users: any[]): Promise<void> {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { supabaseId, email, name, department } = body
+    const { supabaseId, email, name } = body
 
     if (!supabaseId || !email || !name) {
       return NextResponse.json(
@@ -47,7 +47,6 @@ export async function POST(request: Request) {
       supabaseId,
       email: email.toLowerCase().trim(),
       name: name.trim(),
-      department: department || null,
       examHistory: [],
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),

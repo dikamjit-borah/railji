@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
+import { NavigationProvider } from "@/components/NavigationProvider";
 
 export const metadata: Metadata = {
   title: "Railjee - Railway Exam Platform",
@@ -31,7 +33,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
+        <Suspense>
+          <NavigationProvider>
+            {children}
+          </NavigationProvider>
+        </Suspense>
       </body>
     </html>
   );

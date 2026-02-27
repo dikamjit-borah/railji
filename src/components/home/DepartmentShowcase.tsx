@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
+import { useNavigation } from '@/components/NavigationProvider';
 import { departmentCache } from '@/lib/departmentCache';
 
 interface Department {
@@ -100,7 +100,7 @@ const getDepartmentIcon = (deptId: string, iconName?: string): React.ReactNode =
 };
 
 export default function DepartmentShowcase({ dataReady = false }: DepartmentShowcaseProps) {
-  const router = useRouter();
+  const { navigate } = useNavigation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(!dataReady);
 
@@ -207,7 +207,7 @@ export default function DepartmentShowcase({ dataReady = false }: DepartmentShow
             departments.map((dept, index) => (
             <button
               key={dept.id}
-              onClick={() => router.push(`/departments/${dept.id}`)}
+              onClick={() => navigate(`/departments/${dept.id}`)}
               className="group relative bg-gradient-to-br from-stone-50 to-stone-100/50 hover:from-white hover:to-stone-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 text-left border border-stone-200/50"
               style={{ animationDelay: `${index * 50}ms` }}
             >
@@ -233,7 +233,7 @@ export default function DepartmentShowcase({ dataReady = false }: DepartmentShow
         {/* CTA */}
         <div className="text-center">
           <button
-            onClick={() => router.push('/departments')}
+            onClick={() => navigate('/departments')}
             className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-stone-900 text-white font-semibold rounded-full hover:bg-stone-800 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             Browse All Departments

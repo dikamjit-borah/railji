@@ -4,7 +4,6 @@ export interface IUser extends Document {
   supabaseId: string
   email: string
   name: string
-  department?: string
   examHistory: Array<{
     examId: string
     paperId: string
@@ -40,20 +39,6 @@ const UserSchema = new Schema<IUser>(
       required: true,
       trim: true,
     },
-    department: {
-      type: String,
-      required: false,
-      enum: [
-        'Civil',
-        'Mechanical',
-        'Electrical',
-        'Commercial',
-        'Personnel',
-        'Operating',
-        'S&T',
-        'DFCCIL/Metro',
-      ],
-    },
     examHistory: [
       {
         examId: { type: String, required: true },
@@ -76,8 +61,5 @@ const UserSchema = new Schema<IUser>(
     timestamps: true,
   }
 )
-
-// Additional index for department filtering (supabaseId and email are indexed via schema field options)
-UserSchema.index({ department: 1 })
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema)

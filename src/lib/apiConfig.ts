@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   START_EXAM: `${API_BASE_URL}/business/v1/exams/start`,
   SUBMIT_EXAM: `${API_BASE_URL}/business/v1/exams/submit`,
   EXAM_RESULT: (examId: string) => `${API_BASE_URL}/business/v1/exams/result/${examId}`,
+  USERS: `${API_BASE_URL}/business/v1/users`,
 } as const;
 
 export default API_ENDPOINTS;
