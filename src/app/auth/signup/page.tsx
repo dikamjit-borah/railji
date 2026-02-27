@@ -233,7 +233,7 @@ export default function SignUpPage() {
             <div className="text-center space-y-1">
               <h3 className="text-xl font-bold text-stone-900">Check your email</h3>
               <p className="text-sm text-stone-600">
-                We've sent a verification link to{' '}
+                We&apos;ve sent a verification link to{' '}
                 <span className="font-medium text-stone-800">{email}</span>.
                 Please verify your account before signing in.
               </p>
