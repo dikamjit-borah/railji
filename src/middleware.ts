@@ -33,21 +33,11 @@ export async function middleware(request: NextRequest) {
   const isHomePage = pathname === '/'
   const isProtectedRoute = !isHomePage && !isAuthPage && !isApiRoute
 
-  let user = null
-  try {
-    const { data, error } = await supabase.auth.getUser()
-    if (error) {
-      // AuthSessionMissingError is normal for unauthenticated requests — not a real error
-      if (error.name !== 'AuthSessionMissingError') {
-        console.error('[middleware] supabase.auth.getUser error:', error.message)
-      }
-    } else {
-      user = data.user
-    }
-  } catch (err) {
-    console.error('[middleware] unexpected error calling getUser:', err)
-    // treat as unauthenticated on error
-  }
+  // Use getSession() in middleware — reads JWT from cookie without a network call.
+  // getUser() makes an external request to Supabase on every request which causes
+  // "middleware invocation failed" on Vercel's Edge Runtime.
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
   if (isProtectedRoute && !user) {
     const redirectUrl = new URL('/auth/signin', request.url)

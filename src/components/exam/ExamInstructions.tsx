@@ -149,7 +149,7 @@ export default function ExamInstructions({
               </div>
               <div className="flex-1">
                 <div className="text-base sm:text-lg lg:text-xl font-bold text-stone-900">{exam.passPercentage}%</div>
-                <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">For Badge / Passing Score</div>
+                <div className="text-xxs sm:text-xs lg:text-sm text-stone-500">Passing Percentage</div>
               </div>
             </div>
 

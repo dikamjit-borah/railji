@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { createUser } from '@/lib/api'
+import Navbar from '@/components/common/Navbar'
 import Link from 'next/link'
 
 export default function SignUpPage() {
@@ -11,6 +13,7 @@ export default function SignUpPage() {
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showVerifyModal, setShowVerifyModal] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -32,28 +35,23 @@ export default function SignUpPage() {
 
       if (signUpError) throw signUpError
 
-      // 2. Create user profile in MongoDB via /api/users/create
+      // 2. Create user profile via backend API
       if (data.user) {
-        const response = await fetch('/api/users/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            supabaseId: data.user.id,
-            email: data.user.email,
-            name,
-          }),
+        const { success, error: createError } = await createUser({
+          supabaseId: data.user.id,
+          email: data.user.email!,
+          name,
         })
 
-        if (!response.ok) {
-          throw new Error('Failed to create user profile')
+        if (!success) {
+          throw new Error(createError || 'Failed to create user profile')
         }
 
-        alert('Please check your email to verify your account!')
-        router.push('/auth/signin')
+        setLoading(false)
+        setShowVerifyModal(true)
       }
     } catch (error: any) {
       setError(error.message || 'An error occurred during sign up')
-    } finally {
       setLoading(false)
     }
   }
@@ -72,8 +70,15 @@ export default function SignUpPage() {
     }
   }
 
+  function handleVerifyOk() {
+    setShowVerifyModal(false)
+    router.push('/auth/signin')
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#faf9f7] px-4 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col bg-[#faf9f7]">
+      <Navbar variant="home" ctaLabel="Sign In" ctaHref="/auth/signin" />
+      <div className="flex-1 flex items-center justify-center px-4 overflow-hidden relative">
       {/* Decorative Elements - Railway themed */}
       <div className="hidden sm:block absolute top-20 right-10 sm:right-20 w-16 sm:w-24 h-16 sm:h-24 text-orange-500 opacity-20">
         <svg viewBox="0 0 100 100" fill="currentColor">
@@ -211,6 +216,38 @@ export default function SignUpPage() {
           </Link>
         </p>
       </div>
+      </div>
+
+      {/* Email Verification Modal */}
+      {showVerifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center gap-5">
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            {/* Text */}
+            <div className="text-center space-y-1">
+              <h3 className="text-xl font-bold text-stone-900">Check your email</h3>
+              <p className="text-sm text-stone-600">
+                We&apos;ve sent a verification link to{' '}
+                <span className="font-medium text-stone-800">{email}</span>.
+                Please verify your account before signing in.
+              </p>
+            </div>
+            {/* Button */}
+            <button
+              onClick={handleVerifyOk}
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 px-4 rounded-full font-semibold hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all shadow-lg"
+            >
+              Go to Sign In
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

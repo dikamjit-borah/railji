@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
@@ -20,7 +19,7 @@ interface ProfileClientProps {
 interface UserProfile {
   name: string;
   email: string;
-  department?: string;
+
   createdAt?: string;
   lastActive?: string;
   examHistory?: Array<{
@@ -35,7 +34,7 @@ interface UserProfile {
 export default function ProfileClient({ user }: ProfileClientProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
   const supabase = createClient();
 
   const fullName =
@@ -70,10 +69,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     fetchProfile();
   }, [user.id]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+  function handleSignOut() {
+    setSigningOut(true);
+    supabase.auth.signOut();
+    window.location.href = '/';
   }
 
   const examHistory = profile?.examHistory || [];
@@ -108,7 +107,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
       {/* Profile Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
         {/* Header Banner */}
-        <div className="h-24 bg-gradient-to-r from-blue-600 to-blue-400" />
+        <div className="h-24 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-400" />
 
         {/* Avatar + Name */}
         <div className="px-6 pb-6">
@@ -121,20 +120,24 @@ export default function ProfileClient({ user }: ProfileClientProps) {
             <div>
               <h1 className="text-2xl font-bold text-stone-900">{fullName}</h1>
               <p className="text-stone-500 text-sm mt-0.5">{user.email}</p>
-              {profile?.department && (
-                <span className="inline-block mt-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
-                  {profile.department} Department
-                </span>
-              )}
+
             </div>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-full hover:bg-red-50 transition-colors shrink-0"
+              disabled={signingOut}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-orange-600 border border-orange-200 rounded-full hover:bg-orange-50 transition-colors shrink-0 disabled:opacity-60"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign Out
+              {signingOut ? (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              )}
+              {signingOut ? 'Signing out...' : 'Sign Out'}
             </button>
           </div>
         </div>

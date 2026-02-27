@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useNavigation } from '@/components/NavigationProvider';
 import UserMenu from '@/components/common/UserMenu';
 
 interface NavbarProps {
@@ -10,7 +10,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user }: NavbarProps) {
-  const router = useRouter();
+  const { navigate } = useNavigation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -149,7 +149,7 @@ export default function Navbar({ user }: NavbarProps) {
                 ))}
                 <button
                   onClick={() => {
-                    router.push('/departments');
+                    navigate('/departments');
                     setIsMobileMenuOpen(false);
                   }}
                   className="mt-2 px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all"

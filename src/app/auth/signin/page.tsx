@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Navbar from '@/components/common/Navbar'
 import Link from 'next/link'
 
 export default function SignInPage() {
@@ -14,7 +15,7 @@ export default function SignInPage() {
   const searchParams = useSearchParams()
   const supabase = createClient()
   
-  const redirectTo = searchParams.get('redirect') || '/departments'
+  const redirectTo = searchParams.get('redirect') || '/'
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
@@ -29,11 +30,11 @@ export default function SignInPage() {
 
       if (error) throw error
 
+      // Keep loading=true so the spinner stays visible during navigation
       router.push(redirectTo)
       router.refresh()
     } catch (error: any) {
       setError(error.message || 'Invalid email or password')
-    } finally {
       setLoading(false)
     }
   }
@@ -53,7 +54,9 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#faf9f7] px-4 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col bg-[#faf9f7]">
+      <Navbar variant="home" ctaLabel="Sign Up" ctaHref="/auth/signup" />
+      <div className="flex-1 flex items-center justify-center px-4 overflow-hidden relative">
       {/* Decorative Elements - Railway themed */}
       <div className="hidden sm:block absolute top-20 right-10 sm:right-20 w-16 sm:w-24 h-16 sm:h-24 text-orange-500 opacity-20">
         <svg viewBox="0 0 100 100" fill="currentColor">
@@ -188,11 +191,12 @@ export default function SignInPage() {
         </button>
 
         <p className="text-center text-sm text-stone-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="font-medium text-orange-600 hover:text-orange-700">
             Sign up for free
           </Link>
         </p>
+      </div>
       </div>
     </div>
   )

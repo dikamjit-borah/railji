@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
+import { useNavigation } from '@/components/NavigationProvider';
 import { type TopPaper } from '@/lib/api';
 import { departmentCache } from '@/lib/departmentCache';
 
@@ -139,7 +139,7 @@ interface ExamCardsProps {
 }
 
 export default function ExamCards({ dataReady = false, papers = [] }: ExamCardsProps) {
-  const router = useRouter();
+  const { navigate } = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
@@ -197,9 +197,9 @@ export default function ExamCards({ dataReady = false, papers = [] }: ExamCardsP
 
   const handleStartExam = (examId: string, departmentSlug?: string) => {
     if (departmentSlug) {
-      router.push(`/exam/${examId}?dept=${departmentSlug}`);
+      navigate(`/exam/${examId}?dept=${departmentSlug}`);
     } else {
-      router.push(`/exam/${examId}`);
+      navigate(`/exam/${examId}`);
     }
   };
 
@@ -408,7 +408,7 @@ export default function ExamCards({ dataReady = false, papers = [] }: ExamCardsP
           {/* View All Link */}
           <div className="text-center mt-6 sm:mt-8 lg:mt-10">
             <button
-              onClick={() => router.push('/departments')}
+              onClick={() => navigate('/departments')}
               className="inline-flex items-center gap-2 text-stone-700 font-medium hover:text-orange-600 transition-colors group text-sm sm:text-base"
             >
               View All Exams

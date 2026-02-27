@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
@@ -474,7 +474,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
       <DepartmentBanner
         department={department}
         activeTab={activeTab}
-        filteredCount={activeTab === 'papers' ? filteredPapers.length : filteredMaterials.length}
+        filteredCount={activeTab === 'papers' ? totalPapersCount : filteredMaterials.length}
       />
 
       <div className="px-3 sm:px-4 lg:px-8 pb-4 sm:pb-6 lg:pb-8">

@@ -1,6 +1,31 @@
 // API utilities for Rail-Jee
 import { API_ENDPOINTS } from './apiConfig';
 
+export interface CreateUserPayload {
+  supabaseId: string;
+  email: string;
+  name: string;
+}
+
+export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(API_ENDPOINTS.USERS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { success: false, error: errorData.message || `HTTP error! status: ${response.status}` };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to create user profile' };
+  }
+}
+
 class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);

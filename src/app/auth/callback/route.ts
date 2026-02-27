@@ -25,7 +25,6 @@ export async function GET(request: Request) {
             supabaseId: data.user.id,
             email: data.user.email,
             name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User',
-            department: data.user.user_metadata?.department || 'Civil',
           }),
         })
       } catch (error) {
