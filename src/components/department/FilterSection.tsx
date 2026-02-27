@@ -112,8 +112,8 @@ export default function FilterSection({
               Previous Year
             </button>
 
-            {/* Sectional Paper Buttons - Show first 4 */}
-            {mainExamTypes.slice(0, 4).map((type) => {
+            {/* Sectional Paper Buttons - Show first 3 */}
+            {mainExamTypes.slice(0, 3).map((type) => {
               const isAvailable = allExamTypes.includes(type);
               if (!isAvailable) return null;
               return (

@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Question } from '@/lib/types';
+import { createClient } from '@/lib/supabase/client';
+import UserMenu from '@/components/common/UserMenu';
 import { ReviewFilter, FilterCounts, QuestionReviewProps, FilteredQuestion } from '@/lib/examTypes';
 import { filterQuestions, getFilterCounts } from '@/lib/examUtils';
 import ExamQuestion from './exam/ExamQuestion';
@@ -133,8 +135,17 @@ interface ReviewHeaderProps {
 }
 
 function ReviewHeader({ examName, onBack, onShowPalette }: ReviewHeaderProps) {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+  }, []);
+
   return (
-    <div className="shadow-md sticky top-0 z-40">
+    <div className="bg-white shadow-md sticky top-0 z-40">
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -163,6 +174,7 @@ function ReviewHeader({ examName, onBack, onShowPalette }: ReviewHeaderProps) {
                 <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
               </svg>
             </button>
+            {user && <UserMenu user={user} />}
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <img
                 src="/images/logo.png"

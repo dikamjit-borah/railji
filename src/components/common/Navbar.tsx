@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useNavigation } from '@/components/NavigationProvider';
+import { createClient } from '@/lib/supabase/client';
+import UserMenu from '@/components/common/UserMenu';
 
 export type NavbarVariant = 'home' | 'departments' | 'stats' | 'departmentDetail' | 'examResult';
 
@@ -13,6 +15,8 @@ interface NavbarProps {
   backHref?: string;
   statsInfo?: string;
   paperName?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export default function Navbar({
@@ -21,17 +25,28 @@ export default function Navbar({
   subtitle,
   backHref = '/',
   statsInfo,
-  paperName
+  paperName,
+  ctaLabel,
+  ctaHref,
 }: NavbarProps) {
-  const router = useRouter();
+  const { navigate } = useNavigation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+    });
+  }, []);
 
   // Home variant - Full navbar with navigation
   if (variant === 'home') {
-    return <HomeNavbar 
+    return <HomeNavbar
+      ctaLabel={ctaLabel}
+      ctaHref={ctaHref}
       isMobileMenuOpen={isMobileMenuOpen}
       setIsMobileMenuOpen={setIsMobileMenuOpen}
-      router={router}
     />;
   }
 
@@ -56,13 +71,16 @@ export default function Navbar({
                 </p>
               </div>
             </Link>
-            <Link href="/" className="transition-transform hover:scale-105">
-              <img
-                src="/images/logo.png"
-                alt="RailJee Logo"
-                className="h-8 sm:h-10 lg:h-12 w-auto"
-              />
-            </Link>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {user && <UserMenu user={user} />}
+              <Link href="/" className="transition-transform hover:scale-105">
+                <img
+                  src="/images/logo.png"
+                  alt="RailJee Logo"
+                  className="h-8 sm:h-10 lg:h-12 w-auto"
+                />
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -77,7 +95,7 @@ export default function Navbar({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => router.push(backHref)}
+              onClick={() => navigate(backHref)}
                 className="p-2 hover:bg-stone-100 rounded-xl transition-colors"
               >
                 <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,20 +104,21 @@ export default function Navbar({
               </button>
               <div>
                 <h1 className="text-lg font-bold text-stone-900">
-                  {title || 'Your Statistics'}
+                  {title || 'My Statistics'}
                 </h1>
                 <p className="text-xs text-stone-500">
                   {subtitle || 'Track your exam performance'}
                 </p>
               </div>
             </div>
-            {statsInfo && (
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {statsInfo && (
                 <span className="text-xs text-stone-500 hidden sm:block">
                   {statsInfo}
                 </span>
-              </div>
-            )}
+              )}
+              {user && <UserMenu user={user} />}
+            </div>
           </div>
         </div>
       </header>
@@ -118,17 +137,20 @@ export default function Navbar({
                 <p className="text-xxs sm:text-xs text-stone-500">{subtitle || (paperName ? `Paper: ${paperName}` : '')}</p>
               </div>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
-              aria-label="Go to home"
-            >
-              <img
-                src="/images/logo.png"
-                alt="RailJee Logo"
-                className="h-8 sm:h-10 w-auto"
-              />
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {user && <UserMenu user={user} />}
+              <button
+              onClick={() => navigate('/')}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                aria-label="Go to home"
+              >
+                <img
+                  src="/images/logo.png"
+                  alt="RailJee Logo"
+                  className="h-8 sm:h-10 w-auto"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -143,10 +165,14 @@ export default function Navbar({
 interface HomeNavbarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
-  router: any;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
-function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, router }: HomeNavbarProps) {
+function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, ctaLabel, ctaHref }: HomeNavbarProps) {
+  const { navigate } = useNavigation();
+  const resolvedCtaLabel = ctaLabel ?? 'Start Preparing';
+  const resolvedCtaAction = ctaHref ? () => navigate(ctaHref) : () => navigate('/departments');
   const navItems = [
     { name: 'Tests', href: '#exams' },
     { name: 'Resources', href: '#features' },
@@ -198,10 +224,10 @@ function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, router }: HomeNavba
           {/* CTA Button */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             <button
-              onClick={() => router.push('/departments')}
+              onClick={resolvedCtaAction}
               className="hidden sm:inline-flex px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all duration-300"
             >
-              Start Preparing
+              {resolvedCtaLabel}
             </button>
 
             {/* Mobile Menu Button */}
@@ -263,12 +289,12 @@ function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, router }: HomeNavba
                 ))}
                 <button
                   onClick={() => {
-                    router.push('/departments');
+                    resolvedCtaAction();
                     setIsMobileMenuOpen(false);
                   }}
                   className="mt-2 px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all"
                 >
-                  Start Preparing
+                  {resolvedCtaLabel}
                 </button>
               </div>
             </div>

@@ -113,7 +113,7 @@ export default function StatsPage() {
       {/* Header */}
       <Navbar 
         variant="stats"
-        title="Your Statistics"
+        title="My Statistics"
         subtitle="Track your exam performance"
         backHref="/"
         statsInfo={`${stats?.totalAttempts || 0} total attempts`}

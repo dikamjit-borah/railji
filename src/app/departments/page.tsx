@@ -233,7 +233,7 @@ export default function DepartmentsPage() {
         <LoadingScreen 
           isLoading={true} 
           message="Loading departments..." 
-          animationPath="/animation/Trainbasic.lottie/a/Scene.json"
+          animationPath="/animation/Train Animation.lottie/a/Main Scene.json"
         />
         <div className="min-h-screen bg-[#faf9f7]" />
       </>
