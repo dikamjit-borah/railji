@@ -39,6 +39,7 @@ export default function SignInPage() {
     }
   }
 
+  /* Google OAuth - temporarily disabled
   async function handleGoogleSignIn() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -52,6 +53,7 @@ export default function SignInPage() {
       setError(error.message)
     }
   }
+  */
 
   return (
     <div className="min-h-screen flex flex-col bg-[#faf9f7]">
@@ -155,6 +157,7 @@ export default function SignInPage() {
           </button>
         </form>
 
+        {/* Google OAuth - temporarily disabled
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-stone-300"></div>
@@ -189,6 +192,7 @@ export default function SignInPage() {
           </svg>
           Sign in with Google
         </button>
+        */}
 
         <p className="text-center text-sm text-stone-600">
           Don&apos;t have an account?{' '}
