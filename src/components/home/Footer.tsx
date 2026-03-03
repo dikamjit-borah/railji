@@ -57,7 +57,17 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-stone-800 mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
           <p className="text-stone-500 text-xs sm:text-sm">&copy; 2026 RailJee. All rights reserved.</p>
-          <p className="text-stone-500 text-xs sm:text-sm">Made with ❤️ for Railway Aspirants</p>
+          <p className="text-stone-500 text-xs sm:text-sm">
+            Made with ❤️ by{' '}
+            <a 
+              href="https://backendandbeyond.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-stone-400 hover:text-white transition-colors underline decoration-dotted"
+            >
+              Backend & Beyond
+            </a>
+          </p>
         </div>
       </div>
     </footer>
