@@ -56,7 +56,7 @@ export default function SignUpPage() {
     }
   }
 
-  /* Google OAuth - temporarily disabled
+  // Google OAuth - temporarily disabled
   async function handleGoogleSignUp() {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -70,7 +70,7 @@ export default function SignUpPage() {
       setError(error.message)
     }
   }
-  */
+
 
   function handleVerifyOk() {
     setShowVerifyModal(false)
@@ -176,7 +176,6 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        {/* Google OAuth - temporarily disabled
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-stone-300"></div>
@@ -211,7 +210,6 @@ export default function SignUpPage() {
           </svg>
           Continue with Google
         </button>
-        */}
 
         <p className="text-center text-sm text-stone-600">
           Already have an account?{' '}
