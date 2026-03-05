@@ -31,7 +31,8 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
   const isHomePage = pathname === '/'
-  const isProtectedRoute = !isHomePage && !isAuthPage && !isApiRoute
+  const isPublicPage = pathname === '/privacy-policy' || pathname === '/terms-of-service' || pathname === '/about'
+  const isProtectedRoute = !isHomePage && !isAuthPage && !isApiRoute && !isPublicPage
 
   // Use getSession() in middleware — reads JWT from cookie without a network call.
   // getUser() makes an external request to Supabase on every request which causes
