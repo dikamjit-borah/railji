@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Question } from '@/lib/types';
-import { ExamMode, ExamProgress, ReviewFilter, UseExamStateProps, UseExamStateReturn } from '@/lib/examTypes';
+import { ExamMode, ReviewFilter, UseExamStateProps, UseExamStateReturn } from '@/lib/examTypes';
 import { filterQuestions, getFilterCounts } from '@/lib/examUtils';
 
 /**
@@ -125,15 +125,6 @@ export function useExamState({ totalQuestions }: UseExamStateProps): UseExamStat
     });
   }, [currentIndex]);
 
-  // Get current progress
-  const getProgress = useCallback((): ExamProgress => ({
-    currentIndex,
-    answers,
-    markedForReview,
-    visitedQuestions,
-    lockedQuestions
-  }), [currentIndex, answers, markedForReview, visitedQuestions, lockedQuestions]);
-
   // Derived values
   const answeredCount = answers.filter(a => a !== null).length;
   const skippedCount = answers.filter(a => a === null).length;
@@ -155,8 +146,7 @@ export function useExamState({ totalQuestions }: UseExamStateProps): UseExamStat
     goToNextQuestion,
     goToPreviousQuestion,
     toggleMarkForReview,
-    saveCurrentAnswer,
-    getProgress
+    saveCurrentAnswer
   };
 }
 
@@ -213,4 +203,4 @@ export function useQuestionReview(questions: Question[], answers: (number | null
 }
 
 // Re-export types for convenience
-export type { ExamMode, ExamProgress, ReviewFilter };
+export type { ExamMode, ReviewFilter };

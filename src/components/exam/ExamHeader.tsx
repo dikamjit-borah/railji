@@ -12,8 +12,6 @@ export default function ExamHeader({
   onShowPalette,
   onSubmit
 }: ExamHeaderProps) {
-  const isLowTimeValue = isTimeLow(timeRemaining);
-
   return (
     <div className="bg-white shadow-md sticky top-0 z-40">
       <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
@@ -38,7 +36,7 @@ export default function ExamHeader({
           {/* Right - Timer, Grid & Submit */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Timer */}
-            <TimerDisplay time={timeRemaining} isLowTime={isLowTimeValue} />
+            <TimerDisplay time={timeRemaining} isLowTime={isTimeLow(timeRemaining)} />
 
             {/* Question Palette Toggle */}
             <button

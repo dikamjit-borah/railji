@@ -3,7 +3,6 @@
 interface SubmitConfirmationProps {
   totalQuestions: number;
   answeredCount: number;
-  visitedCount: number;
   skippedCount: number;
   markedCount: number;
   answers: (number | null)[];
@@ -18,7 +17,6 @@ interface SubmitConfirmationProps {
 export default function SubmitConfirmation({
   totalQuestions,
   answeredCount,
-  visitedCount,
   skippedCount,
   markedCount,
   answers,
