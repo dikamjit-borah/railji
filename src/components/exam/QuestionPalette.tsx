@@ -2,8 +2,6 @@
 
 import { Question } from '@/lib/types';
 
-type QuestionStatus = 'current' | 'answered' | 'marked' | 'not-answered' | 'not-visited';
-
 interface QuestionPaletteProps {
   totalQuestions: number;
   currentQuestionIndex: number;
@@ -29,14 +27,6 @@ export default function QuestionPalette({
   reviewMode = false,
   questions = []
 }: QuestionPaletteProps) {
-  const getQuestionStatus = (index: number): QuestionStatus => {
-    if (index === currentQuestionIndex) return 'current';
-    if (answers[index] !== null) return 'answered';
-    if (markedForReview[index]) return 'marked';
-    if (visitedQuestions.has(index)) return 'not-answered';
-    return 'not-visited';
-  };
-
   const answeredCount = answers.filter(a => a !== null).length;
   const markedCount = markedForReview.filter(Boolean).length;
   const skippedCount = answers.filter(a => a === null).length;
@@ -91,7 +81,6 @@ export default function QuestionPalette({
         <p className="text-xxs sm:text-xs text-stone-500 uppercase tracking-wide mb-2 sm:mb-3 font-medium text-center">Question Overview</p>
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
           {Array.from({ length: totalQuestions }).map((_, index) => {
-            const status = getQuestionStatus(index);
             const answer = answers[index];
             const isAnswered = answer !== null;
             const isMarked = markedForReview[index];

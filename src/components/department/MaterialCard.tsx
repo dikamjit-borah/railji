@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Material } from '@/lib/types';
 
 interface MaterialCardProps {
@@ -24,7 +25,8 @@ const formatAttempts = (num: number) => {
 
 export default function MaterialCard({ material, index, onSelect }: MaterialCardProps) {
   const contentType: 'pdf' | 'video' = material.type === 'video' ? 'video' : 'pdf';
-  const rating = 4.5 + (Math.random() * 0.5); // Generate rating between 4.5-5.0
+  // Computed once on mount — Math.random() here prevents hydration mismatches if moved to SSR later
+  const rating = useMemo(() => 4.5 + Math.random() * 0.5, []);
   const materialType = material.type as keyof typeof materialTypes;
   
   return (

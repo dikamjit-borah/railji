@@ -1,11 +1,10 @@
-'use client';
-
+import Link from 'next/link';
 import { ExamPaper } from '@/lib/types';
 
 interface PaperCardProps {
   paper: ExamPaper;
   index: number;
-  onSelect: (paper: ExamPaper) => void;
+  href: string;
 }
 
 const formatAttempts = (num: number | undefined) => {
@@ -16,11 +15,11 @@ const formatAttempts = (num: number | undefined) => {
   return num.toString();
 };
 
-export default function PaperCard({ paper, index, onSelect }: PaperCardProps) {
+export default function PaperCard({ paper, index, href }: PaperCardProps) {
   return (
-    <button
-      onClick={() => onSelect(paper)}
-      className="relative w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 text-left shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 group border border-stone-100 overflow-hidden"
+    <Link
+      href={href}
+      className="relative w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 text-left shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 group border border-stone-100 overflow-hidden block"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Hover Overlay */}
@@ -110,6 +109,6 @@ export default function PaperCard({ paper, index, onSelect }: PaperCardProps) {
           </div>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }

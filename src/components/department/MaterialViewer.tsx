@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Material } from '@/lib/types';
 
 interface MaterialViewerProps {
@@ -17,7 +17,8 @@ const formatAttempts = (num: number) => {
 
 export default function MaterialViewer({ material, onClose }: MaterialViewerProps) {
   const contentType: 'pdf' | 'video' = material.type === 'video' ? 'video' : 'pdf';
-  const rating = 4.5 + (Math.random() * 0.5); // Generate rating between 4.5-5.0
+  // Computed once on mount — stable across re-renders
+  const rating = useMemo(() => 4.5 + Math.random() * 0.5, []);
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Close modal when clicking outside
