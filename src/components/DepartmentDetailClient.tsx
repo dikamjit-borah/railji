@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigation } from '@/components/NavigationProvider';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
-import LoadingScreen from './LoadingScreen';
+import dynamic from 'next/dynamic';
 import ErrorScreen from './common/ErrorScreen';
 import DepartmentHeader from './department/DepartmentHeader';
 import DepartmentBanner from './department/DepartmentBanner';
@@ -15,12 +15,14 @@ import PaperCard from './department/PaperCard';
 import MaterialCard from './department/MaterialCard';
 import MaterialViewer from './department/MaterialViewer';
 
+const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
+
 interface DepartmentDetailClientProps {
   slug: string;
 }
 
 export default function DepartmentDetailClient({ slug }: DepartmentDetailClientProps) {
-  const router = useRouter();
+  const { isNavigating } = useNavigation();
 
   // Paper type filter: 'full' (Previous Year), 'sectional', 'general'
   const [paperTypeFilter, setPaperTypeFilter] = useState<'full' | 'sectional' | 'general'>('full');
@@ -85,6 +87,8 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
 
   // Fetch department data from API
   useEffect(() => {
+    const abortController = new AbortController();
+    const { signal } = abortController;
     isFetchingRef.current = true;
     const fetchDepartmentData = async () => {
       const isLoadingMore = page > 1;
@@ -120,7 +124,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
             setExternalDeptId(apiDeptId);
           } else {
             // Not in cache, fetch from API
-            const deptsResponse = await fetch(API_ENDPOINTS.DEPARTMENTS);
+            const deptsResponse = await fetch(API_ENDPOINTS.DEPARTMENTS, { signal });
             
             if (!deptsResponse.ok) {
               throw new Error(`Failed to fetch departments: ${deptsResponse.statusText}`);
@@ -175,7 +179,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         }
         
         // Fetch papers from external API
-        const papersResponse = await fetch(papersUrl);
+        const papersResponse = await fetch(papersUrl, { signal });
         
         if (!papersResponse.ok) {
           throw new Error(`Failed to fetch papers: ${papersResponse.statusText}`);
@@ -271,24 +275,26 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
           });
         }
         
-        // Prefetch materials in the background
-        setTimeout(() => {
-          fetchMaterials();
-        }, 500);
+        // Prefetch materials in the background (pass deptId directly to avoid stale closure)
+        fetchMaterials(apiDeptId);
       } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
         const error = err as Error;
         setError(error.message || 'Failed to load department data');
         console.error('Error fetching department data:', err);
       } finally {
-        setLoading(false);
-        setLoadingPapers(false);
-        setLoadingMore(false);
-        setIsInitialLoad(false);
         isFetchingRef.current = false;
+        if (!signal.aborted) {
+          setLoading(false);
+          setLoadingPapers(false);
+          setLoadingMore(false);
+          setIsInitialLoad(false);
+        }
       }
     };
 
     fetchDepartmentData();
+    return () => abortController.abort();
   }, [slug, paperTypeFilter, selectedPaperCode, page, sortBy]);
 
   // Infinite scroll observer
@@ -328,20 +334,16 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   };
 
   // Fetch materials data (lazy loaded)
-  const fetchMaterials = async () => {
-    if (materialsLoaded) return; // Don't fetch if already loaded
-    
-    // Wait for externalDeptId to be available
-    if (!externalDeptId) {
-      console.warn('Cannot fetch materials: externalDeptId not available yet');
-      return;
-    }
-    
+  const fetchMaterials = async (deptId?: string) => {
+    if (materialsLoaded) return;
+
+    const idToUse = deptId || externalDeptId;
+    if (!idToUse) return;
+
     try {
       setLoadingMaterials(true);
-      
-      // Fetch directly from external API
-      const response = await fetch(API_ENDPOINTS.MATERIALS(externalDeptId));
+
+      const response = await fetch(API_ENDPOINTS.MATERIALS(idToUse));
       
       if (!response.ok) {
         throw new Error(`Failed to fetch materials: ${response.statusText}`);
@@ -373,25 +375,10 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     return availableExamTypes.slice(0, 2);
   }, [availableExamTypes]);
 
-  // Get all unique exam types
-  const allExamTypes = useMemo(() => {
-    return availableExamTypes;
-  }, [availableExamTypes]);
-
   // Get other exam types (remaining items after first 2, shown in dropdown)
   const otherExamTypes = useMemo(() => {
     return availableExamTypes.slice(2);
   }, [availableExamTypes]);
-
-  // Get all unique subjects
-  const allSubjects = useMemo(() => {
-    return availableSubjects;
-  }, [availableSubjects]);
-
-  const filteredPapers = useMemo(() => {
-    // Papers are already filtered and sorted by API
-    return papers;
-  }, [papers]);
 
   const materialTypeOptions = useMemo(() => {
     const types = [...new Set(materials.map(m => m.type))];
@@ -405,8 +392,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     });
   }, [materials, selectedMaterialType]);
 
-  // Loading state
-  if (loading) {
+  // Loading state — suppress when NavigationProvider is already showing a transition animation
+  // to avoid two consecutive full-screen animations playing back-to-back.
+  if (loading && !isNavigating) {
     return <LoadingScreen 
       isLoading={true} 
       message="Loading department data..." 
@@ -425,12 +413,6 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     );
   }
 
-  const handlePaperSelect = (paper: ExamPaper) => {
-    // Navigate with 'general' slug if general paper type is active, otherwise use current department slug
-    const deptSlug = paperTypeFilter === 'general' ? 'general' : slug;
-    router.push(`/exam/${paper.examId}?dept=${deptSlug}`);
-  };
-
   const handleTabChange = (tab: 'papers' | 'materials') => {
     setActiveTab(tab);
     if (tab === 'materials' && !materialsLoaded && !loadingMaterials) {
@@ -448,28 +430,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
 
   return (
     <div className="min-h-screen bg-[#faf9f7]">
-      <DepartmentHeader 
-        examTypes={availableExamTypes}
-        subjects={availableSubjects}
-        onExamTypeSelect={(type) => {
-          setPaperTypeFilter('sectional');
-          setSelectedPaperCode(type);
-          setPage(1);
-          setHasMore(true);
-        }}
-        onSubjectSelect={(subject) => {
-          setPaperTypeFilter('general');
-          setSelectedPaperCode(subject);
-          setPage(1);
-          setHasMore(true);
-        }}
-        onPreviousYearSelect={() => {
-          setPaperTypeFilter('full');
-          setSelectedPaperCode('');
-          setPage(1);
-          setHasMore(true);
-        }}
-      />
+      <DepartmentHeader />
 
       <DepartmentBanner
         department={department}
@@ -481,7 +442,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         <div className="max-w-7xl mx-auto">
           <TabNavigation
             activeTab={activeTab}
-            papersCount={filteredPapers.length}
+            papersCount={papers.length}
             loadingMaterials={loadingMaterials}
             materialsLoaded={materialsLoaded}
             onTabChange={handleTabChange}
@@ -495,9 +456,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         paperTypeFilter={paperTypeFilter}
         selectedPaperCode={selectedPaperCode}
         mainExamTypes={mainExamTypes}
-        allExamTypes={allExamTypes}
+        allExamTypes={availableExamTypes}
         otherExamTypes={otherExamTypes}
-        allGeneralPapers={allSubjects}
+        allGeneralPapers={availableSubjects}
         showOthersDropdown={showOthersDropdown}
         showGeneralDropdown={showGeneralDropdown}
         onFullPaperClick={() => {
@@ -553,7 +514,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
               {/* Results Count */}
               <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
                 <p className="text-stone-600 text-sm sm:text-base">
-                  Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{totalPapersCount || filteredPapers.length}</span> {(totalPapersCount || filteredPapers.length) === 1 ? 'paper' : 'papers'}
+                  Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{totalPapersCount || papers.length}</span> {(totalPapersCount || papers.length) === 1 ? 'paper' : 'papers'}
                 </p>
                 <div className="hidden lg:flex items-center gap-3 text-stone-700 text-sm relative" ref={sortDropdownRef}>
                   <button 
@@ -608,7 +569,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
 
               {/* Papers Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {filteredPapers.length === 0 && !loadingPapers ? (
+                {papers.length === 0 && !loadingPapers ? (
                   <div className="md:col-span-2 lg:col-span-3 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-10 text-center">
                     <svg className="w-12 h-12 sm:w-16 sm:h-16 text-orange-400 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -617,12 +578,12 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                     <p className="text-sm sm:text-base text-stone-600">Try adjusting your filters</p>
                   </div>
                 ) : (
-                  filteredPapers.map((paper, index) => (
+                  papers.map((paper, index) => (
                     <PaperCard
                       key={paper.id}
                       paper={paper}
                       index={index}
-                      onSelect={handlePaperSelect}
+                      href={`/exam/${paper.examId}?dept=${paperTypeFilter === 'general' ? 'general' : slug}`}
                     />
                   ))
                 )}
@@ -640,7 +601,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                       <span className="text-stone-600 text-sm font-medium">Loading more papers...</span>
                     </div>
                   )}
-                  {!hasMore && filteredPapers.length > 0 && !loadingPapers && (
+                  {!hasMore && papers.length > 0 && !loadingPapers && (
                     <p className="text-stone-400 text-sm">You&apos;ve reached the end</p>
                   )}
                 </div>

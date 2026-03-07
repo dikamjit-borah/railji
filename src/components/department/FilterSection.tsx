@@ -100,9 +100,7 @@ export default function FilterSection({
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* Previous Year (Full Paper) Button */}
             <button
-              onClick={() => {
-                onFullPaperClick?.();
-              }}
+              onClick={onFullPaperClick}
               className={`px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 rounded-full text-xxs sm:text-xs lg:text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                 paperTypeFilter === 'full'
                   ? 'bg-orange-500 text-white shadow-md'

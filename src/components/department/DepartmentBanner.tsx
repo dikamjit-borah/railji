@@ -1,5 +1,3 @@
-'use client';
-
 interface DepartmentInfo {
   fullName: string;
 }
