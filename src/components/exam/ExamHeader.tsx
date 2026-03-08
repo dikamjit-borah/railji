@@ -21,10 +21,10 @@ export default function ExamHeader({
             <img
               src="/images/logo.png"
               alt="RailJee Logo"
-              className="h-8 sm:h-10 w-auto"
+              className="h-7 sm:h-10 w-auto"
             />
-            <div>
-              <h1 className="text-xs sm:text-sm font-bold text-stone-800 leading-tight">
+            <div className='pl-2'>
+              <h1 className="text-xxs sm:text-xs font-semibold text-stone-700 leading-tight">
                 {examName}
               </h1>
               <p className="text-xxs sm:text-xs text-stone-500">

@@ -123,7 +123,7 @@ export default function DepartmentShowcase({ departments: rawDepartments = [] }:
               className="group relative block bg-gradient-to-br from-stone-50 to-stone-100/50 hover:from-white hover:to-stone-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 text-left border border-stone-200/50"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="mb-2 sm:mb-3 text-orange-600 transform group-hover:scale-110 transition-transform duration-300">{dept.icon}</div>
+              <div className="mb-2 sm:mb-3 text-orange-600 transform group-hover:scale-110 transition-transform duration-300 [&>svg]:w-6 [&>svg]:h-6 sm:[&>svg]:w-10 sm:[&>svg]:h-10">{dept.icon}</div>
               <h3 className="font-bold text-stone-900 mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base leading-tight">
                 {dept.name}
               </h3>

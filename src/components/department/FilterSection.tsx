@@ -184,9 +184,9 @@ export default function FilterSection({
               </div>
             )}
 
-            {/* General Papers Dropdown - Pushed to the right */}
+            {/* General Papers Dropdown - Pushed to the right on sm+, new row left-aligned on mobile */}
             {allGeneralPapers.length > 0 && (
-              <div className="relative ml-auto" ref={generalDropdownRef}>
+              <div className="relative basis-full sm:basis-auto sm:ml-auto" ref={generalDropdownRef}>
                 <button
                   onClick={() => {
                     onToggleGeneralDropdown?.();
@@ -215,7 +215,7 @@ export default function FilterSection({
 
                 {/* General Papers Dropdown Menu */}
                 {showGeneralDropdown && (
-                  <div className="absolute top-full mt-1.5 right-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full mt-1.5 left-0 sm:left-auto sm:right-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
                     {allGeneralPapers.map((paper) => (
                       <button
                         key={paper}

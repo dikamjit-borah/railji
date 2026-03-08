@@ -104,9 +104,9 @@ export default function Testimonials() {
   };
 
   return (
-    <section id="about" className="py-12 sm:py-16 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[#faf9f7]">
+    <section id="about" className="py-8 sm:py-16 lg:py-28 px-3 sm:px-6 lg:px-8 bg-[#faf9f7]">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-20 items-start lg:items-center">
           {/* Left - Success Stats */}
           <div className="relative">
             <div className="relative bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-2xl sm:rounded-3xl overflow-hidden aspect-[4/3] shadow-2xl">
@@ -118,38 +118,38 @@ export default function Testimonials() {
               </div>
 
               {/* Content */}
-              <div className="relative h-full flex flex-col justify-center items-center text-center px-6 sm:px-8 py-8">
+              <div className="relative h-full flex flex-col justify-center items-center text-center px-4 sm:px-6 py-6 sm:py-8">
                 {/* Main stat */}
-                <div className="mb-6 sm:mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full mb-3 sm:mb-4 border-2 border-white/30">
-                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="mb-4 sm:mb-6">
+                  <div className="inline-flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 bg-white/20 backdrop-blur-sm rounded-full mb-2 sm:mb-3 border-2 border-white/30">
+                    <svg className="w-7 h-7 sm:w-9 sm:h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2">
+                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
                     10,000<span className="text-orange-200">+</span>
                   </div>
-                  <p className="text-white/90 font-semibold text-base sm:text-lg">Railway Employees Promoted</p>
+                  <p className="text-white/90 font-semibold text-sm sm:text-base">Railway Employees Promoted</p>
                 </div>
 
                 {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-sm">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
-                    <div className="text-2xl sm:text-3xl font-bold text-white mb-1">85%</div>
-                    <p className="text-white/80 text-xs sm:text-sm">Success Rate</p>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-sm">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2.5 sm:p-3 border border-white/20">
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">85%</div>
+                    <p className="text-white/80 text-xs sm:text-sm leading-tight">Success Rate</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/20">
-                    <div className="text-2xl sm:text-3xl font-bold text-white mb-1">7+</div>
-                    <p className="text-white/80 text-xs sm:text-sm">Departments</p>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2.5 sm:p-3 border border-white/20">
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">7+</div>
+                    <p className="text-white/80 text-xs sm:text-sm leading-tight">Departments</p>
                   </div>
                 </div>
 
                 {/* Trust badge */}
-                <div className="mt-6 sm:mt-8 flex items-center gap-2 text-white/90">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="mt-4 sm:mt-6 flex items-center gap-2 text-white/90">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-sm font-medium">Trusted by Indian Railways</span>
+                  <span className="text-xs sm:text-sm font-medium">Trusted by Indian Railways</span>
                 </div>
               </div>
 
@@ -162,20 +162,20 @@ export default function Testimonials() {
             </div>
 
             {/* Floating badge */}
-            <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6">
-              <div className="bg-white rounded-full p-3 sm:p-4 shadow-xl border-4 border-orange-100">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-orange-600">4.8★</div>
-                  <p className="text-xs text-stone-600 font-medium">Rating</p>
+            <div className="absolute -bottom-2 -right-2 sm:-bottom-6 sm:-right-6">
+                <div className="bg-white rounded-full p-1.5 sm:p-2 shadow-md sm:shadow-lg border-2 sm:border-4 border-orange-100">
+                  <div className="text-center">
+                    <div className="text-sm sm:text-xl font-bold text-orange-600">4.8★</div>
+                    <p className="text-xs sm:text-xs text-stone-600 font-medium leading-tight">Rating</p>
+                  </div>
                 </div>
-              </div>
             </div>
           </div>
 
           {/* Right - Testimonials */}
           <div>
-            <div className="flex items-start justify-between mb-6 sm:mb-8 gap-4">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-stone-900 leading-tight">
+            <div className="flex items-start justify-between mb-4 sm:mb-6 gap-2">
+              <h2 className="text-lg sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-stone-900 leading-snug">
                 Success Stories from Railway Employees
               </h2>
               <a href="#" className="text-stone-600 hover:text-stone-900 transition-colors">
@@ -187,31 +187,31 @@ export default function Testimonials() {
 
             {/* Testimonial Cards */}
             <div 
-              className={`space-y-4 sm:space-y-5 transition-all duration-200 ease-in-out ${
+              className={`space-y-3 sm:space-y-4 transition-all duration-200 ease-in-out ${
                 isTransitioning ? 'opacity-0 -translate-x-4' : 'opacity-100 translate-x-0'
               }`}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
               {[currentIndex, (currentIndex + 1) % testimonials.length].map((index) => (
-                <div key={index} className="relative bg-gradient-to-br from-white to-orange-50/20 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl transition-all duration-300 border border-orange-100/50">
+                <div key={index} className="relative bg-gradient-to-br from-white to-orange-50/20 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg transition-all duration-300 border border-orange-100/50">
                   {/* Quote icon */}
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 text-orange-200 opacity-40">
-                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-4 text-orange-200 opacity-40">
+                    <svg className="w-5 h-5 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                     </svg>
                   </div>
-                  <p className="text-stone-700 mb-3 sm:mb-4 leading-relaxed text-xs sm:text-sm relative z-10 pr-6">
+                  <p className="text-stone-700 mb-2.5 sm:mb-3 leading-relaxed text-xs sm:text-sm relative z-10 pr-6">
                     &ldquo;{testimonials[index].quote}&rdquo;
                   </p>
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0 shadow-lg">
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-md">
                       {testimonials[index].avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-stone-900 text-xs sm:text-sm">{testimonials[index].name}</div>
-                      <div className="text-xs text-orange-600 font-medium mb-0.5">{testimonials[index].role}</div>
-                      <div className="text-xs text-stone-500 truncate">{testimonials[index].location}</div>
+                      <div className="font-semibold text-stone-900 text-xs leading-tight">{testimonials[index].name}</div>
+                      <div className="text-xs text-orange-600 font-medium mb-0.5 leading-tight">{testimonials[index].role}</div>
+                      <div className="text-xs text-stone-500 truncate leading-tight">{testimonials[index].location}</div>
                     </div>
                   </div>
                 </div>
@@ -219,35 +219,35 @@ export default function Testimonials() {
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center gap-3 sm:gap-4 mt-5 sm:mt-6">
-              <div className="flex gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-3 sm:gap-4 mt-4 sm:mt-6 flex-wrap">
+              <div className="flex gap-1 sm:gap-2">
                 {Array.from({ length: Math.ceil(testimonials.length / 2) }).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToTestimonialSet(index)}
-                    className={`h-1.5 sm:h-2 rounded-full transition-all ${
-                      Math.floor(currentIndex / 2) === index ? 'bg-stone-900 w-5 sm:w-6' : 'bg-stone-300 w-1.5 sm:w-2'
+                    className={`h-1 sm:h-1.5 rounded-full transition-all ${
+                      Math.floor(currentIndex / 2) === index ? 'bg-stone-900 w-4 sm:w-6' : 'bg-stone-300 w-1 sm:w-1.5'
                     }`}
                     aria-label={`Go to testimonial set ${index + 1}`}
                   />
                 ))}
               </div>
-              <div className="flex gap-2 ml-auto">
+              <div className="flex gap-1.5 sm:gap-2">
                 <button
                   onClick={prevTestimonial}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
                   aria-label="Previous testimonials"
                 >
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button
                   onClick={nextTestimonial}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 flex items-center justify-center text-white hover:bg-stone-800 transition-colors"
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-stone-900 flex items-center justify-center text-white hover:bg-stone-800 transition-colors"
                   aria-label="Next testimonials"
                 >
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>

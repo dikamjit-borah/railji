@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Hero() {
 
   return (
-    <section className="relative py-8 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#faf9f7]">
+    <section className="relative py-4 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#faf9f7]">
       {/* Decorative Elements - Railway themed */}
       <div className="hidden sm:block absolute top-20 right-10 sm:right-20 w-16 sm:w-24 h-16 sm:h-24 text-orange-500 opacity-80">
         <svg viewBox="0 0 100 100" fill="currentColor">
@@ -41,19 +41,19 @@ export default function Hero() {
             </div>
 
             {/* Stats */}
-            <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-stone-200">
-              <div className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:gap-8 lg:gap-12">
-                <div className="bg-stone-50 rounded-xl p-3 sm:p-0 sm:bg-transparent text-center sm:text-left">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">8</div>
-                  <div className="text-stone-500 text-xs sm:text-sm mt-1">Departments</div>
+            <div className="mt-3 sm:mt-12 pt-2 sm:pt-8 border-t-0 sm:border-t border-stone-200">
+              <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-8 lg:gap-12">
+                <div>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">8</div>
+                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Departments</div>
                 </div>
-                <div className="bg-stone-50 rounded-xl p-3 sm:p-0 sm:bg-transparent text-center sm:text-left">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">50+</div>
-                  <div className="text-stone-500 text-xs sm:text-sm mt-1">Exam Papers</div>
+                <div>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-4">50+</div>
+                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Exam Papers</div>
                 </div>
-                <div className="bg-stone-50 rounded-xl p-3 sm:p-0 sm:bg-transparent text-center sm:text-left">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">Bilingual</div>
-                  <div className="text-stone-500 text-xs sm:text-sm mt-1">Hindi & English</div>
+                <div>
+                  <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">Bilingual</div>
+                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1  md:pl-2">Hindi & English</div>
                 </div>
               </div>
             </div>
@@ -91,10 +91,10 @@ export default function Hero() {
               </div>
 
               {/* Floating Elements */}
-              <div className="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 w-16 sm:w-24 lg:w-32 h-16 sm:h-24 lg:h-32 bg-orange-500 rounded-full flex items-center justify-center shadow-lg sm:shadow-xl">
+              <div className="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 w-14 sm:w-24 lg:w-25 h-14 sm:h-24 lg:h-25 bg-orange-500 rounded-full flex items-center justify-center shadow-lg sm:shadow-xl">
                 <div className="text-center text-white">
-                  <div className="text-sm sm:text-2xl lg:text-3xl font-bold">5000+</div>
-                  <div className="text-xxs sm:text-sm">Questions</div>
+                  <div className="text-xxs md:text-md lg:text-xl font-bold">5000+</div>
+                  <div className="text-xxs md:text-sm">Questions</div>
                 </div>
               </div>
 

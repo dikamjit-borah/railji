@@ -155,7 +155,7 @@ export default function DepartmentsPage() {
         <LoadingScreen
           isLoading={true}
           message="Loading departments..."
-          animationPath="/animation/Train Animation.lottie/a/Main Scene.json"
+          animationPath="/animation/Trainbasic.lottie/a/Scene.json"
         />
         <div className="min-h-screen bg-[#faf9f7]" />
       </>
@@ -207,7 +207,7 @@ export default function DepartmentsPage() {
           <img
             src="/images/train-svg.svg"
             alt="Train"
-            className="h-10 sm:h-14 lg:h-24 w-auto mx-auto"
+            className="h-14 lg:h-24 w-auto mx-auto"
             style={{
               filter: 'brightness(0) saturate(100%) invert(27%) sepia(93%) saturate(2345%) hue-rotate(346deg) brightness(93%) contrast(101%)',
             }}
@@ -215,12 +215,12 @@ export default function DepartmentsPage() {
         </div>
 
         {/* Departments Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 pb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pb-6">
           {departments.map((dept, index) => (
             <Link
               key={dept.id}
               href={`/departments/${dept.id}`}
-              className="bounce-card group relative overflow-hidden rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-95 active:opacity-50"
+              className="bounce-card group relative overflow-hidden rounded-lg sm:rounded-2xl p-2 sm:p-4 lg:p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-95 active:opacity-50"
               style={{
                 animationDelay: `${index * 0.2}s`,
                 boxShadow: '0 8px 20px -4px rgba(0,0,0,0.25), 0 12px 25px -5px rgba(0,0,0,0.15)',
@@ -236,27 +236,27 @@ export default function DepartmentsPage() {
               </div>
 
               {/* Content */}
-              <div className="relative z-10 h-full flex flex-col justify-between min-h-[110px] sm:min-h-[130px] lg:min-h-[140px]">
+              <div className="relative z-10 h-full flex flex-col justify-between min-h-[90px] sm:min-h-[130px] lg:min-h-[140px]">
                 <div>
                   <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white mb-0.5 sm:mb-1 leading-tight">
                     {dept.name}
                   </h3>
-                  <p className="text-white/70 text-xxs sm:text-xs line-clamp-2 hidden sm:block">
+                  <p className="text-white/70 text-xxs sm:text-xs line-clamp-2 sm:block">
                     {dept.description}
                   </p>
                 </div>
 
-                <div className="flex items-end justify-between mt-2 sm:mt-3 lg:mt-4">
+                <div className="flex items-end justify-between mt-1.5 sm:mt-3 lg:mt-4">
                   {/* Arrow — animates with CSS group-hover, no JS state */}
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:translate-x-1">
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:bg-white/30 group-hover:translate-x-1">
+                    <svg className="w-2.5 h-2.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </div>
 
                   {/* Railway Emblem — animates with CSS group-hover, no JS state */}
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full border-2 border-yellow-400/80 bg-white/90 flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <div className="text-red-700 scale-75 sm:scale-90 lg:scale-100">
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full border-2 border-yellow-400/80 bg-white/90 flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                    <div className="text-red-700 scale-50 sm:scale-90 lg:scale-100">
                       {dept.icon}
                     </div>
                   </div>

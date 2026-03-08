@@ -514,18 +514,18 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
               {/* Results Count */}
               <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
                 <p className="text-stone-600 text-sm sm:text-base">
-                  Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{totalPapersCount || papers.length}</span> {(totalPapersCount || papers.length) === 1 ? 'paper' : 'papers'}
+                  Showing <span className="font-semibold text-stone-900 text-md">{totalPapersCount || papers.length}</span> {(totalPapersCount || papers.length) === 1 ? 'paper' : 'papers'}
                 </p>
-                <div className="hidden lg:flex items-center gap-3 text-stone-700 text-sm relative" ref={sortDropdownRef}>
+                <div className="flex items-center gap-3 text-stone-700 text-sm relative" ref={sortDropdownRef}>
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="px-4 py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-2"
+                    className="px-2 py-1 lg:px-4 lg:py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-1.5 lg:gap-2"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
                     </svg>
-                    Sort by: {sortBy === 'name' ? 'Name' : 'Date'}
-                    <svg className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="text-xs lg:text-sm">Sort: {sortBy === 'name' ? 'Name' : 'Date'}</span>
+                    <svg className={`w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -624,7 +624,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
               {/* Materials Results Count */}
               <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6">
                 <p className="text-stone-600 text-sm sm:text-base">
-                  Showing <span className="font-semibold text-stone-900 text-base sm:text-lg">{filteredMaterials.length}</span> {filteredMaterials.length === 1 ? 'material' : 'materials'}
+                  Showing <span className="font-semibold text-stone-900 text-md">{filteredMaterials.length}</span> {filteredMaterials.length === 1 ? 'material' : 'materials'}
                 </p>
               </div>
 

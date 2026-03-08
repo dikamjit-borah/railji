@@ -30,7 +30,6 @@ export default function Navbar({
   ctaHref,
 }: NavbarProps) {
   const { navigate } = useNavigation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -45,8 +44,6 @@ export default function Navbar({
     return <HomeNavbar
       ctaLabel={ctaLabel}
       ctaHref={ctaHref}
-      isMobileMenuOpen={isMobileMenuOpen}
-      setIsMobileMenuOpen={setIsMobileMenuOpen}
     />;
   }
 
@@ -63,7 +60,7 @@ export default function Navbar({
                 </svg>
               </button>
               <div>
-                <h1 className="text-sm sm:text-md font-bold text-stone-900">
+                <h1 className="hidden sm:block text-sm sm:text-md font-bold text-stone-900">
                   {title || 'Select Department'}
                 </h1>
                 <p className="text-xxs sm:text-xs text-stone-500 hidden sm:block">
@@ -72,12 +69,14 @@ export default function Navbar({
               </div>
             </Link>
             <div className="flex items-center gap-2 sm:gap-3">
-              {user && <UserMenu user={user} />}
+              {user && <UserMenu user={user} navItems={[
+                { name: 'Home', href: '/' },
+              ]} />}
               <Link href="/" className="transition-transform hover:scale-105">
                 <img
                   src="/images/logo.png"
                   alt="RailJee Logo"
-                  className="h-10 w-auto"
+                  className="h-7 sm:h-10 w-auto"
                 />
               </Link>
             </div>
@@ -117,7 +116,10 @@ export default function Navbar({
                   {statsInfo}
                 </span>
               )}
-              {user && <UserMenu user={user} />}
+              {user && <UserMenu user={user} navItems={[
+                { name: 'Home', href: '/' },
+                { name: 'Departments', href: '/departments' },
+              ]} />}
             </div>
           </div>
         </div>
@@ -138,7 +140,10 @@ export default function Navbar({
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              {user && <UserMenu user={user} />}
+              {user && <UserMenu user={user} navItems={[
+                { name: 'Home', href: '/' },
+                { name: 'Departments', href: '/departments' },
+              ]} />}
               <button
               onClick={() => navigate('/')}
                 className="hover:opacity-80 transition-opacity cursor-pointer"
@@ -147,7 +152,7 @@ export default function Navbar({
                 <img
                   src="/images/logo.png"
                   alt="RailJee Logo"
-                  className="h-8 sm:h-10 w-auto"
+                  className="h-7 sm:h-10 w-auto"
                 />
               </button>
             </div>
@@ -163,13 +168,11 @@ export default function Navbar({
 
 // Home Navbar Component
 interface HomeNavbarProps {
-  isMobileMenuOpen: boolean;
-  setIsMobileMenuOpen: (open: boolean) => void;
   ctaLabel?: string;
   ctaHref?: string;
 }
 
-function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, ctaLabel, ctaHref }: HomeNavbarProps) {
+function HomeNavbar({ ctaLabel, ctaHref }: HomeNavbarProps) {
   const { navigate } = useNavigation();
   const resolvedCtaLabel = ctaLabel ?? 'Start Preparing';
   const resolvedCtaAction = ctaHref ? () => navigate(ctaHref) : () => navigate('/departments');
@@ -189,7 +192,7 @@ function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, ctaLabel, ctaHref }
             <img
               src="/images/logo.png"
               alt="RailJee Logo"
-              className="h-10 w-auto transition-transform group-hover:scale-105"
+              className="h-7 sm:h-10 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
           
@@ -222,85 +225,16 @@ function HomeNavbar({ isMobileMenuOpen, setIsMobileMenuOpen, ctaLabel, ctaHref }
           </div>
 
           {/* CTA Button */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center">
             <button
               onClick={resolvedCtaAction}
-              className="hidden sm:inline-flex px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all duration-300"
+              className="inline-flex px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all duration-300"
             >
               {resolvedCtaLabel}
             </button>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-1.5 sm:p-2 text-stone-600 hover:text-stone-900"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
-
       </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          
-          {/* Mobile Menu */}
-          <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-100 z-50 md:hidden px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto py-4">
-              <div className="flex flex-col space-y-3">
-                {navItems.map((item) => (
-                  item.isRoute ? (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-stone-600 hover:text-stone-900 font-medium py-2 px-2 transition-colors flex items-center gap-2 rounded-lg hover:bg-stone-50"
-                    >
-                      {item.name === 'My Stats' && (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      )}
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-stone-600 hover:text-stone-900 font-medium py-2 px-2 transition-colors rounded-lg hover:bg-stone-50"
-                    >
-                      {item.name}
-                    </a>
-                  )
-                ))}
-                <button
-                  onClick={() => {
-                    resolvedCtaAction();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="mt-2 px-5 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-full hover:bg-orange-700 transition-all"
-                >
-                  {resolvedCtaLabel}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </nav>
   );
 }

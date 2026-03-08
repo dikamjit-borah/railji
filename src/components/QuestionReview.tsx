@@ -74,7 +74,6 @@ export default function QuestionReview({
       <ReviewHeader 
         examName={examName}
         onBack={onBackToResult}
-        onShowPalette={() => setShowReviewPalette(true)}
       />
 
       {/* Filter Tabs */}
@@ -82,6 +81,7 @@ export default function QuestionReview({
         activeFilter={reviewFilter}
         filterCounts={filterCounts}
         onFilterChange={handleFilterChange}
+        onShowPalette={() => setShowReviewPalette(true)}
       />
 
       {/* Main Content */}
@@ -138,10 +138,9 @@ export default function QuestionReview({
 interface ReviewHeaderProps {
   examName: string;
   onBack: () => void;
-  onShowPalette: () => void;
 }
 
-function ReviewHeader({ examName, onBack, onShowPalette }: ReviewHeaderProps) {
+function ReviewHeader({ examName, onBack }: ReviewHeaderProps) {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -170,23 +169,12 @@ function ReviewHeader({ examName, onBack, onShowPalette }: ReviewHeaderProps) {
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={onShowPalette}
-              className="p-1.5 hover:bg-stone-100 rounded-lg transition-all flex items-center justify-center"
-            >
-              <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
-                <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
-                <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
-                <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
-              </svg>
-            </button>
             {user && <UserMenu user={user} />}
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <img
                 src="/images/logo.png"
                 alt="RailJee Logo"
-                className="h-8 sm:h-10 w-auto"
+                className="h-7 sm:h-10 w-auto"
               />
             </Link>
           </div>
@@ -200,9 +188,10 @@ interface FilterTabsProps {
   activeFilter: ReviewFilter;
   filterCounts: FilterCounts;
   onFilterChange: (filter: ReviewFilter) => void;
+  onShowPalette: () => void;
 }
 
-function FilterTabs({ activeFilter, filterCounts, onFilterChange }: FilterTabsProps) {
+function FilterTabs({ activeFilter, filterCounts, onFilterChange, onShowPalette }: FilterTabsProps) {
   const filters: { key: ReviewFilter; label: string; activeClass: string }[] = [
     { key: 'all', label: 'All', activeClass: 'bg-stone-800 text-white' },
     { key: 'correct', label: 'Correct', activeClass: 'bg-green-500 text-white' },
@@ -213,18 +202,33 @@ function FilterTabs({ activeFilter, filterCounts, onFilterChange }: FilterTabsPr
   return (
     <div>
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-1 sm:py-2">
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {filters.map(({ key, label, activeClass }) => (
-            <button
-              key={key}
-              onClick={() => onFilterChange(key)}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-medium text-xxs sm:text-xs transition-all ${
-                activeFilter === key ? activeClass : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-              }`}
-            >
-              {label} ({filterCounts[key]})
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 flex-1">
+            {filters.map(({ key, label, activeClass }) => (
+              <button
+                key={key}
+                onClick={() => onFilterChange(key)}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-lg font-medium text-xxs sm:text-xs transition-all ${
+                  activeFilter === key ? activeClass : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                {label} ({filterCounts[key]})
+              </button>
+            ))}
+          </div>
+          {/* Palette Button */}
+          <button
+            onClick={onShowPalette}
+            className="ml-auto p-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg transition-all flex items-center justify-center flex-shrink-0"
+            title="Question Palette"
+          >
+            <svg className="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
+              <rect x="14" y="3" width="7" height="7" rx="1" strokeWidth={1.5} />
+              <rect x="3" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
+              <rect x="14" y="14" width="7" height="7" rx="1" strokeWidth={1.5} />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

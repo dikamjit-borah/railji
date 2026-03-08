@@ -52,29 +52,32 @@ export default function Features() {
         </div>
         
         {/* Features Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-6">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group text-center bg-gradient-to-br from-white to-stone-50/50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-stone-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300"
+              className="group text-center bg-gradient-to-br from-white to-stone-50/50 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-stone-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300"
             >
               {/* Icon Container */}
               <div className="relative inline-flex items-center justify-center mb-3 sm:mb-5">
-                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-gradient-to-br from-stone-100 to-stone-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-stone-700 group-hover:from-stone-900 group-hover:to-stone-800 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md">
+                <div className="w-11 h-11 sm:w-20 sm:h-20 bg-gradient-to-br from-stone-100 to-stone-200/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-stone-700 group-hover:from-stone-900 group-hover:to-stone-800 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md [&>svg]:w-6 [&>svg]:h-6 sm:[&>svg]:w-10 sm:[&>svg]:h-10">
                   {feature.icon}
                 </div>
                 {/* Arrow indicator */}
-                <div className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 w-5 h-5 sm:w-7 sm:h-7 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-500 transition-all duration-300 shadow-sm">
-                  <svg className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-orange-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-4 h-4 sm:w-7 sm:h-7 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-500 transition-all duration-300 shadow-sm">
+                  <svg className="w-2 h-2 sm:w-3.5 sm:h-3.5 text-orange-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                   </svg>
                 </div>
               </div>
-              
-              <h3 className="text-sm sm:text-lg font-bold text-stone-900 mb-1.5 sm:mb-3 leading-tight">
+
+              <h3 className="text-xs sm:text-lg font-bold text-stone-900 mb-1 sm:mb-3 leading-snug">
                 {feature.title}
               </h3>
-              <p className="text-stone-600 text-xs leading-relaxed">
+              <p className="text-stone-600 text-xs leading-relaxed hidden sm:block">
+                {feature.description}
+              </p>
+              <p className="text-stone-500 text-[11px] leading-relaxed sm:hidden line-clamp-3">
                 {feature.description}
               </p>
             </div>

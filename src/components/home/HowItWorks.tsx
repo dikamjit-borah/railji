@@ -58,33 +58,35 @@ export default function HowItWorks() {
         </div>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-6">
           {steps.map((step, index) => (
             <div key={index} className="relative">
               {/* Connector Line - Desktop only */}
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-orange-200 to-transparent -translate-x-1/2 z-0"></div>
               )}
-              
-              {/* Step Card */}
-              <div className="relative bg-gradient-to-br from-white via-white to-orange-50/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 hover:border-orange-200 hover:-translate-y-1">
-                {/* Number Badge */}
-                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-base sm:text-lg rounded-full mb-3 sm:mb-4 shadow-md">
-                  {step.number}
-                </div>
 
-                {/* Icon */}
-                <div className="text-orange-600 mb-3 sm:mb-4">
-                  {step.icon}
+              {/* Step Card */}
+              <div className="relative flex sm:flex-col items-start bg-gradient-to-br from-white via-white to-orange-50/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 hover:border-orange-200 hover:-translate-y-1">
+                {/* Left column: badge + icon (mobile), stacked (desktop) */}
+                <div className="flex flex-col items-center shrink-0 mr-4 sm:mr-0 sm:flex-row sm:mb-4 gap-2 sm:gap-3">
+                  <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-base sm:text-lg rounded-full shadow-md">
+                    {step.number}
+                  </div>
+                  <div className="text-orange-600">
+                    {step.icon}
+                  </div>
                 </div>
 
                 {/* Content */}
-                <h3 className="text-sm sm:text-xl font-bold text-stone-900 mb-1.5 sm:mb-3 leading-tight">
-                  {step.title}
-                </h3>
-                <p className="text-stone-600 text-xs leading-relaxed">
-                  {step.description}
-                </p>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-xl font-bold text-stone-900 mb-1 sm:mb-3 leading-snug">
+                    {step.title}
+                  </h3>
+                  <p className="text-stone-600 text-sm sm:text-xs leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

@@ -63,9 +63,9 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf9f7]">
+    <div className="min-h-screen bg-[#faf9f7]">
       <Navbar variant="home" ctaLabel="Sign Up" ctaHref="/auth/signup" />
-      <div className="flex-1 flex items-center justify-center px-4 overflow-hidden relative">
+      <div className="flex justify-center px-4 pt-8 pb-8 relative">
       {/* Decorative Elements - Railway themed */}
       <div className="hidden sm:block absolute top-20 right-10 sm:right-20 w-16 sm:w-24 h-16 sm:h-24 text-orange-500 opacity-20">
         <svg viewBox="0 0 100 100" fill="currentColor">
@@ -75,12 +75,12 @@ export default function SignInPage() {
       <div className="hidden sm:block absolute bottom-20 left-10 w-20 h-20 rounded-full border-4 border-stone-200 opacity-40"></div>
       <div className="hidden sm:block absolute top-10 left-1/4 w-3 h-3 bg-orange-500 rounded-full opacity-60"></div>
 
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-2xl shadow-xl relative z-10">
+      <div className="max-w-md w-full space-y-5 sm:space-y-8 p-5 sm:p-8 bg-white rounded-2xl shadow-xl relative z-10">
         <div>
-          <h2 className="text-3xl font-bold text-center text-stone-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-stone-900">
             Welcome Back
           </h2>
-          <p className="mt-2 text-center text-sm text-stone-600">
+          <p className="mt-1.5 text-center text-xs sm:text-sm text-stone-600">
             Sign in to continue your exam preparation
           </p>
         </div>
@@ -91,9 +91,9 @@ export default function SignInPage() {
           </div>
         )}
 
-        <form onSubmit={handleSignIn} className="space-y-5">
+        <form onSubmit={handleSignIn} className="space-y-4 sm:space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-stone-700 mb-1">
               Email Address
             </label>
             <input
@@ -102,14 +102,14 @@ export default function SignInPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               placeholder="your.email@example.com"
               autoComplete="email"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-stone-700 mb-1">
               Password
             </label>
             <input
@@ -118,7 +118,7 @@ export default function SignInPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               placeholder="Enter your password"
               autoComplete="current-password"
             />
@@ -132,14 +132,14 @@ export default function SignInPage() {
                 type="checkbox"
                 className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-stone-300 rounded"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-stone-700">
+              <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-stone-700">
                 Remember me
               </label>
             </div>
 
             <Link
               href="/auth/forgot-password"
-              className="text-sm font-medium text-orange-600 hover:text-orange-700"
+              className="text-xs sm:text-sm font-medium text-orange-600 hover:text-orange-700"
             >
               Forgot password?
             </Link>
@@ -148,7 +148,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-4 rounded-full font-semibold hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 sm:py-3 px-4 text-sm sm:text-base rounded-full font-semibold hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -178,7 +178,7 @@ export default function SignInPage() {
           onClick={handleGoogleSignIn}
           type="button"
           disabled={googleLoading || loading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-stone-300 text-stone-700 py-2.5 px-4 rounded-lg font-medium hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white border border-stone-300 text-stone-700 py-2 sm:py-2.5 px-4 text-sm rounded-lg font-medium hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {googleLoading ? (
             <>
@@ -214,7 +214,7 @@ export default function SignInPage() {
         </button>
        
 
-        <p className="text-center text-sm text-stone-600">
+        <p className="text-center text-xs sm:text-sm text-stone-600">
           Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="font-medium text-orange-600 hover:text-orange-700">
             Sign up for free

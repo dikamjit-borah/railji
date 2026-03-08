@@ -35,7 +35,7 @@ export default function DepartmentHeader() {
               <img
                 src="/images/logo.png"
                 alt="RailJee Logo"
-                className="h-10 w-auto"
+                className="h-7 sm:h-10 w-auto"
               />
             </Link>
           </div>

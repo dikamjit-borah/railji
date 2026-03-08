@@ -50,29 +50,29 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     : 'N/A';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       {/* Profile Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
         {/* Header Banner */}
-        <div className="h-24 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-400" />
+        <div className="h-16 sm:h-24 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-400" />
 
         {/* Avatar + Name */}
-        <div className="px-6 pb-6">
+        <div className="px-4 sm:px-6 pb-6">
           {/* Avatar overlapping banner */}
-          <div className="-mt-12 mb-3 w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-orange-500 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-white shadow">
+          <div className="-mt-10 sm:-mt-12 mb-3 w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-600 to-orange-500 flex items-center justify-center text-white text-lg sm:text-2xl font-bold ring-4 ring-white shadow">
             {initials}
           </div>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-stone-900">{fullName}</h1>
-              <p className="text-stone-500 text-sm mt-0.5">{user.email}</p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-base sm:text-2xl font-bold text-stone-900 truncate">{fullName}</h1>
+              <p className="text-stone-500 text-xs sm:text-sm mt-0.5 break-all">{user.email}</p>
 
             </div>
             <button
               onClick={handleSignOut}
               disabled={signingOut}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-orange-600 border border-orange-200 rounded-full hover:bg-orange-50 transition-colors shrink-0 disabled:opacity-60"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium text-orange-600 border border-orange-200 rounded-full hover:bg-orange-50 transition-colors shrink-0 disabled:opacity-60 whitespace-nowrap"
             >
               {signingOut ? (
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
