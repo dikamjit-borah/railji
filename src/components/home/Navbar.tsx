@@ -23,7 +23,7 @@ export default function Navbar({ user }: NavbarProps) {
             <img
               src="/images/logo.png"
               alt="RailJee Logo"
-              className="h-10 w-auto transition-transform group-hover:scale-105"
+              className="h-7 sm:h-10 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
 
@@ -65,7 +65,7 @@ export default function Navbar({ user }: NavbarProps) {
                 >
                   Go to Exams
                 </Link>
-                <UserMenu user={user} />
+                <UserMenu user={user} navItems={navItems.filter(i => !i.href.includes('stats'))} />
               </>
             ) : (
               <>
@@ -81,11 +81,10 @@ export default function Navbar({ user }: NavbarProps) {
                 >
                   Sign Up
                 </Link>
+                {/* Hamburger only for guests — logged-in users use UserMenu */}
+                <NavbarMobileMenu navItems={navItems} />
               </>
             )}
-
-            {/* Mobile menu (client component — needs toggle state) */}
-            <NavbarMobileMenu navItems={navItems} />
           </div>
         </div>
       </div>

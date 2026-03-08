@@ -11,7 +11,7 @@ export default function Footer() {
                 <img
                   src="/images/logo.png"
                   alt="RailJee Logo"
-                  className="h-12 sm:h-14 w-auto transition-transform group-hover:scale-105"
+                  className="h-7 sm:h-10 w-auto transition-transform group-hover:scale-105"
                 />
               </Link>
             </div>
