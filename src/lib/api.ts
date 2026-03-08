@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from './apiConfig';
 export interface CreateUserPayload {
   supabaseId: string;
   email: string;
-  name: string;
+  username: string;
 }
 
 export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean; error?: string }> {

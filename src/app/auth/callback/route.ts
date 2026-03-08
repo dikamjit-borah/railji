@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       const result = await createUser({
         supabaseId: user.id,
         email: user.email!,
-        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+        username: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
       })
       if (!result.success) {
         console.error('Failed to create user profile:', result.error)
