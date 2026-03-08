@@ -37,7 +37,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   // screen appears.
   useEffect(() => {
     const preload = () => {
-      preloadAnimation('/animation/Train Animation.lottie/a/Main Scene.json');
+      // preloadAnimation('/animation/Train Animation.lottie/a/Main Scene.json');
       preloadAnimation('/animation/Trainbasic.lottie/a/Scene.json');
       // Remove listeners after first trigger — we only need to preload once.
       window.removeEventListener('pointerdown', preload);
@@ -115,7 +115,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   return (
     <NavigationContext.Provider value={{ isNavigating, navigate }}>
       {children}
-      <LoadingScreen isLoading={isNavigating} />
+      <LoadingScreen isLoading={isNavigating} message="Loading page..." />
     </NavigationContext.Provider>
   );
 }
