@@ -127,7 +127,7 @@ export default function Testimonials() {
                     </svg>
                   </div>
                   <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
-                    10,000<span className="text-orange-200">+</span>
+                    1000<span className="text-orange-200">+</span>
                   </div>
                   <p className="text-white/90 font-semibold text-sm sm:text-base">Railway Employees Promoted</p>
                 </div>

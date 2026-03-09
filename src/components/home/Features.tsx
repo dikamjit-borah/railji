@@ -2,7 +2,7 @@ export default function Features() {
   const features = [
     {
       title: 'Multiple Departments',
-      description: 'Access exam papers from Civil, Mechanical, Electrical, Commercial, Personnel, Operating, S&T, and DFCCIL/Metro departments',
+      description: 'Access exam papers from Civil, Mechanical, Electrical, Commercial, Personnel, Operating, and S&T departments',
       icon: (
         <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
@@ -29,7 +29,7 @@ export default function Features() {
     },
     {
       title: 'Study Materials',
-      description: 'Download PDFs and access study resources organized by department for comprehensive preparation',
+      description: 'Access study resources organized by department for comprehensive preparation',
       icon: (
         <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
@@ -52,7 +52,7 @@ export default function Features() {
         </div>
         
         {/* Features Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6Muti lg:gap-6">
           {features.map((feature, index) => (
             <div
               key={index}

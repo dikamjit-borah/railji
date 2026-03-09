@@ -9,7 +9,7 @@ interface NavbarProps {
 const navItems = [
   { name: 'Tests', href: '/#exams' },
   { name: 'Resources', href: '/#features' },
-  { name: 'Your Stats', href: '/stats', isRoute: true },
+  { name: 'Stats', href: '/stats', isRoute: true },
   { name: 'About', href: '/about' },
 ];
 
@@ -36,7 +36,7 @@ export default function Navbar({ user }: NavbarProps) {
                   href={item.href}
                   className="text-stone-600 hover:text-stone-900 font-medium transition-colors text-sm flex items-center gap-1.5"
                 >
-                  {item.name === 'Your Stats' && (
+                  {item.name === 'Stats' && (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>

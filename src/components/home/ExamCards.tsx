@@ -217,7 +217,7 @@ export default function ExamCards({ papers, departments = [] }: ExamCardsProps) 
             Choose Your Exam
           </h2>
           <p className="text-sm sm:text-base text-stone-600 leading-relaxed px-4">
-            Select from our top Railway Recruitment Board exam papers and start your preparation journey
+            Select from our top railway departmental exam papers and start your preparation journey.
           </p>
         </div>
 

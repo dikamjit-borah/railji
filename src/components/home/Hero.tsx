@@ -44,7 +44,7 @@ export default function Hero() {
             <div className="mt-3 sm:mt-12 pt-2 sm:pt-8 border-t-0 sm:border-t border-stone-200">
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-8 lg:gap-12">
                 <div>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">8</div>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">7+</div>
                   <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Departments</div>
                 </div>
                 <div>

@@ -119,7 +119,7 @@ export default async function AboutPage() {
                   </svg>
                 ),
                 title: 'Study Materials',
-                desc: 'Download PDFs and access study resources organized by department.',
+                desc: 'Access study resources organized by department.',
               },
               {
                 icon: (
