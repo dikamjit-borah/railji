@@ -1,13 +1,13 @@
 // This file enables static export for dynamic route [deptId]
 export function generateStaticParams() {
   return [
-    { deptId: 'civil' },
+    { deptId: 'civil-engineering' },
     { deptId: 'mechanical' },
     { deptId: 'electrical' },
     { deptId: 'commercial' },
     { deptId: 'personnel' },
     { deptId: 'operating' },
-    { deptId: 'snt' },
-    { deptId: 'metro' },
+    { deptId: 'signal-telecom' },
+    { deptId: 'others' },
   ];
 }

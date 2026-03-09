@@ -25,9 +25,9 @@ export default function Footer() {
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Departments</h3>
             <ul className="space-y-2 sm:space-y-4 text-stone-400">
               <li><Link href="/departments" className="hover:text-white transition-colors text-xs sm:text-sm">All Departments</Link></li>
-              <li><Link href="/departments#civil" className="hover:text-white transition-colors text-xs sm:text-sm">Civil</Link></li>
-              <li><Link href="/departments#mechanical" className="hover:text-white transition-colors text-xs sm:text-sm">Mechanical</Link></li>
-              <li><Link href="/departments#electrical" className="hover:text-white transition-colors text-xs sm:text-sm">Electrical</Link></li>
+              <li><Link href="/departments/civil-engineering" className="hover:text-white transition-colors text-xs sm:text-sm">Civil</Link></li>
+              <li><Link href="/departments/mechanical" className="hover:text-white transition-colors text-xs sm:text-sm">Mechanical</Link></li>
+              <li><Link href="/departments/electrical" className="hover:text-white transition-colors text-xs sm:text-sm">Electrical</Link></li>
             </ul>
           </div>
           
@@ -36,7 +36,7 @@ export default function Footer() {
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Quick Links</h3>
             <ul className="space-y-2 sm:space-y-4 text-stone-400">
               <li><Link href="/#exams" className="hover:text-white transition-colors text-xs sm:text-sm">Practice Tests</Link></li>
-              <li><Link href="/stats" className="hover:text-white transition-colors text-xs sm:text-sm">My Statistics</Link></li>
+              <li><Link href="/stats" className="hover:text-white transition-colors text-xs sm:text-sm">Your Statistics</Link></li>
               <li><Link href="/#features" className="hover:text-white transition-colors text-xs sm:text-sm">Features</Link></li>
               <li><Link href="/#about" className="hover:text-white transition-colors text-xs sm:text-sm">About</Link></li>
             </ul>
@@ -47,7 +47,7 @@ export default function Footer() {
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider mb-3 sm:mb-6">Company</h3>
             <ul className="space-y-2 sm:space-y-4 text-stone-400">
               <li><Link href="/about" className="hover:text-white transition-colors text-xs sm:text-sm">About Us</Link></li>
-              <li><a href="#contact" className="hover:text-white transition-colors text-xs sm:text-sm">Contact</a></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors text-xs sm:text-sm">Contact</Link></li>
               <li><Link href="/privacy-policy" className="hover:text-white transition-colors text-xs sm:text-sm">Privacy Policy</Link></li>
               <li><Link href="/terms-of-service" className="hover:text-white transition-colors text-xs sm:text-sm">Terms of Service</Link></li>
             </ul>
