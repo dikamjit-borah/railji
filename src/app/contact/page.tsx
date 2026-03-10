@@ -28,7 +28,7 @@ const contactDetails = [
       </svg>
     ),
     title: 'Community & Feedback',
-    value: 'Whatsapp Community',
+    value: 'WhatsApp Community',
     href: 'https://chat.whatsapp.com/EXAMPLELINK',
     desc: 'Interact, discuss, and prepare with fellow railway employees.',
   },
