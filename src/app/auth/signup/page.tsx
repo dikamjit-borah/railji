@@ -101,7 +101,7 @@ export default function SignUpPage() {
       <div className="max-w-md w-full space-y-5 sm:space-y-8 p-5 sm:p-8 bg-white rounded-2xl shadow-xl relative z-10">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-center text-stone-900">
-            Join Rail Jee
+            Join RailJee
           </h2>
           <p className="mt-1.5 text-center text-xs sm:text-sm text-stone-600">
             Take the next step in your railway career.

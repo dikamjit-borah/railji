@@ -168,7 +168,7 @@ export default function ContactForm() {
       </button>
 
       <p className="text-xs text-stone-400">
-        By submitting this form you agree to our{' '}
+        By submitting this form, you agree to our{' '}
         <Link href="/privacy-policy" className="underline decoration-dotted hover:text-stone-600 transition-colors">Privacy Policy</Link>.
       </p>
     </form>
