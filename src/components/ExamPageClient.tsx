@@ -252,6 +252,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
             userId,
             paperId: exam.paperId,
             departmentId: exam.departmentId,
+            mode,
           }),
         }).then(response => {
           if (response.ok) {
