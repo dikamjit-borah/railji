@@ -268,7 +268,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       }
       
       // Fetch practice answers in background if needed
-      if (mode === 'practice') {
+      if (mode === 'mock') {
         fetchPracticeAnswers().then(answers => {
           if (answers) {
             setPracticeAnswers(answers);
