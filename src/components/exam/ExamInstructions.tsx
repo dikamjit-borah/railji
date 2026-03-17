@@ -28,7 +28,7 @@ interface ExamInstructionsProps {
     percentage: number;
     totalQuestions: number;
   } | null;
-  onStartExam: (mode: 'exam' | 'practice') => void;
+  onStartExam: (mode: 'mock' | 'live') => void;
   isStarting?: boolean;
 }
 

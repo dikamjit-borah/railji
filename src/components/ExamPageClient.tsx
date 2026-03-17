@@ -352,7 +352,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   }
 
   function handleSelectAnswer(optionIndex: number) {
-    examState.selectAnswer(optionIndex, examMode === 'practice');
+    examState.selectAnswer(optionIndex, examMode === 'mock');
   }
 
   function handleNextQuestion() {
@@ -430,7 +430,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Active exam
   const currentQuestion = questions[examState.currentIndex];
-  const isPracticeMode = examMode === 'practice';
+  const isPracticeMode = examMode === 'mock';
   const isLocked = isPracticeMode && examState.lockedQuestions[examState.currentIndex];
   const correctAnswer = isPracticeMode && isLocked ? practiceAnswers.get(currentQuestion.id) : undefined;
 
