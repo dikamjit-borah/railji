@@ -7,6 +7,7 @@ import { ExamMode } from '@/lib/examTypes';
 import { getExamAttemptCount, getBestScore } from '@/lib/examStorage';
 import { useExamTimer, useExamData, useExamState, useExamSubmission } from '@/hooks';
 import { useNavigation } from '@/components/NavigationProvider';
+import { createClient } from '@/lib/supabase/client';
 import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
@@ -23,6 +24,7 @@ interface PendingSubmission {
   activeExamId: string;
   paperId: string;
   departmentId: string;
+  userId: string;
   answers: (number | null)[];
   markedForReview: boolean[];
   timeRemaining: number;
@@ -49,6 +51,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   const [practiceAnswers, setPracticeAnswers] = useState<Map<number, number>>(new Map());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Ref to allow navigation during submission without triggering beforeunload warning
   const isSubmittingRef = useRef(false);
@@ -92,6 +95,16 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     }
   });
 
+  // Keep userId in sync with auth state
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Scroll to top when question changes
   useEffect(() => {
     if (hasStarted) {
@@ -104,14 +117,19 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     const pendingRaw = sessionStorage.getItem(PENDING_SUBMISSION_KEY);
     if (!pendingRaw) return;
 
-    // Remove immediately to prevent re-processing
-    sessionStorage.removeItem(PENDING_SUBMISSION_KEY);
-
     try {
       const pending: PendingSubmission = JSON.parse(pendingRaw);
 
       // Only process if it matches the current exam
       if (pending.examId !== examId) return;
+
+      const resolvedUserId = pending.userId || userId;
+      if (!resolvedUserId) {
+        return;
+      }
+
+      // Remove immediately to prevent re-processing once we're ready to submit
+      sessionStorage.removeItem(PENDING_SUBMISSION_KEY);
 
       // Auto-submit the exam
       setIsSubmitting(true);
@@ -130,7 +148,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           examId: pending.activeExamId,
-          userId: 'pramoduser',
+          userId: resolvedUserId,
           paperId: pending.paperId,
           departmentId: pending.departmentId,
           attemptedQuestions: attempted,
@@ -157,8 +175,9 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         });
     } catch (err) {
       console.error('Error parsing pending submission:', err);
+      sessionStorage.removeItem(PENDING_SUBMISSION_KEY);
     }
-  }, [examId]);
+  }, [examId, userId, navigate]);
 
   // Keep refs in sync with the latest volatile values (no re-renders, no effect deps)
   useEffect(() => { timeRemainingRef.current = timer.timeRemaining; }, [timer.timeRemaining]);
@@ -188,12 +207,13 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       }
 
       // Save current exam state so it can be submitted after reload
-      if (exam && activeExamId && questions.length > 0 && exam.paperId && exam.departmentId) {
+      if (exam && activeExamId && questions.length > 0 && exam.paperId && exam.departmentId && userId) {
         const pendingData: PendingSubmission = {
           examId,
           activeExamId,
           paperId: exam.paperId,
           departmentId: exam.departmentId,
+          userId,
           answers: answersRef.current,
           markedForReview: markedForReviewRef.current,
           timeRemaining: timeRemainingRef.current,
@@ -242,8 +262,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       setHasStarted(true);
       
       // Track exam start in background (non-blocking)
-      if (exam?.paperId && exam?.departmentId) {
-        const userId = 'pramoduser';
+      if (exam?.paperId && exam?.departmentId && userId) {
         
         fetch(API_ENDPOINTS.START_EXAM, {
           method: 'POST',
@@ -265,10 +284,12 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         }).catch(err => {
           console.error('Error tracking exam start:', err);
         });
+      } else if (exam?.paperId && exam?.departmentId && !userId) {
+        console.warn('Skipping exam start tracking due to missing user id.');
       }
       
       // Fetch practice answers in background if needed
-      if (mode === 'practice') {
+      if (mode === 'mock') {
         fetchPracticeAnswers().then(answers => {
           if (answers) {
             setPracticeAnswers(answers);
@@ -297,6 +318,12 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
     // Submit to API
     if (exam && activeExamId) {
       try {
+        if (!userId) {
+          alert('Please sign in to submit your exam.');
+          setShowSubmitConfirm(false);
+          return;
+        }
+
         setIsSubmitting(true); // Set loading state
         
         const responses = questions.map((question, index) => ({
@@ -310,7 +337,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             examId: activeExamId,
-            userId: 'pramoduser',
+            userId,
             paperId: exam.paperId,
             departmentId: exam.departmentId,
             attemptedQuestions: result.totalQuestions - result.skippedQuestions,
@@ -352,7 +379,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   }
 
   function handleSelectAnswer(optionIndex: number) {
-    examState.selectAnswer(optionIndex, examMode === 'practice');
+    examState.selectAnswer(optionIndex, examMode === 'mock');
   }
 
   function handleNextQuestion() {
@@ -430,7 +457,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
   // Active exam
   const currentQuestion = questions[examState.currentIndex];
-  const isPracticeMode = examMode === 'practice';
+  const isPracticeMode = examMode === 'mock';
   const isLocked = isPracticeMode && examState.lockedQuestions[examState.currentIndex];
   const correctAnswer = isPracticeMode && isLocked ? practiceAnswers.get(currentQuestion.id) : undefined;
 

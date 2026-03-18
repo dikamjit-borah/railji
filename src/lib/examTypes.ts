@@ -1,6 +1,6 @@
 // Common types for exam functionality
 
-export type ExamMode = 'exam' | 'practice';
+export type ExamMode = 'live' | 'mock';
 export type ReviewFilter = 'all' | 'correct' | 'wrong' | 'skipped';
 
 
