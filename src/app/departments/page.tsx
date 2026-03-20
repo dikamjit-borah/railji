@@ -7,6 +7,7 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import Navbar from '@/components/common/Navbar';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
+import { emitExternalApiError } from '@/lib/externalApiError';
 
 const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
 
@@ -86,6 +87,7 @@ export default function DepartmentsPage() {
         setDepartments(mapDepartments(raw));
       } catch (err) {
         setError((err as Error).message || 'Failed to load departments');
+        emitExternalApiError();
       } finally {
         setLoading(false);
       }
@@ -108,23 +110,7 @@ export default function DepartmentsPage() {
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h2 className="text-2xl font-bold text-stone-900 mb-2">Failed to Load</h2>
-          <p className="text-stone-600 mb-6">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-[#faf9f7]" />;
   }
 
   return (

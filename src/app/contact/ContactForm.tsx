@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { emitExternalApiError } from '@/lib/externalApiError';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -36,10 +37,12 @@ export default function ContactForm() {
         const json = await res.json().catch(() => ({}));
         setErrorMsg(json?.error ?? 'Something went wrong. Please try again.');
         setStatus('error');
+        emitExternalApiError();
       }
     } catch {
       setErrorMsg('Network error. Please check your connection and try again.');
       setStatus('error');
+      emitExternalApiError();
     }
   }
 

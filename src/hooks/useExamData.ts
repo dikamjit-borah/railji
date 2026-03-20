@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { Question, Exam } from '@/lib/types';
 import { departmentCache } from '@/lib/departmentCache';
 import { getSupabaseAccessToken } from '@/lib/supabase/client';
+import { emitExternalApiError } from '@/lib/externalApiError';
 
 interface UseExamDataProps {
   examId: string;
@@ -280,6 +281,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
       } catch (err) {
         const error = err as Error;
         setError(error.message || 'Failed to load exam');
+        emitExternalApiError();
         console.error('Error fetching exam details:', err);
       } finally {
         setLoading(false);

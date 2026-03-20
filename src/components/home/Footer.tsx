@@ -1,5 +1,15 @@
 import Link from 'next/link';
+import { FaInstagram, FaXTwitter, FaWhatsapp, FaFacebook, FaLinkedin } from 'react-icons/fa6';
+
 export default function Footer() {
+  const socialLinks = [
+    { name: 'Instagram', icon: FaInstagram, url: 'https://instagram.com', color: 'hover:text-pink-400' },
+    { name: 'X', icon: FaXTwitter, url: 'https://x.com', color: 'hover:text-gray-300' },
+    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://whatsapp.com', color: 'hover:text-green-400' },
+    { name: 'Facebook', icon: FaFacebook, url: 'https://facebook.com', color: 'hover:text-blue-400' },
+    { name: 'LinkedIn', icon: FaLinkedin, url: 'https://linkedin.com', color: 'hover:text-blue-300' },
+  ];
+
   return (
     <footer className="bg-stone-900 text-white py-10 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -18,6 +28,26 @@ export default function Footer() {
             <p className="text-stone-400 text-xs sm:text-sm leading-relaxed">
               Your trusted platform for railway promotional exams. Helping railway professionals prepare with confidence.
             </p>
+            
+            {/* Social Media Links */}
+            <div className="flex items-center space-x-4 mt-6">
+              {socialLinks.map((social) => {
+                const IconComponent = social.icon;
+                return (
+                  <a
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-stone-400 transition-colors duration-200 ${social.color}`}
+                    aria-label={social.name}
+                    title={social.name}
+                  >
+                    <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
           
           {/* Departments */}

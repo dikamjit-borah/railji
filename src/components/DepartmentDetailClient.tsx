@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
 import { getSupabaseAccessToken } from '@/lib/supabase/client';
+import { emitExternalApiError } from '@/lib/externalApiError';
 import dynamic from 'next/dynamic';
 import ErrorScreen from './common/ErrorScreen';
 import DepartmentHeader from './department/DepartmentHeader';
@@ -47,6 +48,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const [loadingMaterials, setLoadingMaterials] = useState(false);
   const [materialsLoaded, setMaterialsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [externalDeptId, setExternalDeptId] = useState<string>('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [generalDeptId, setGeneralDeptId] = useState<string>('');
@@ -109,6 +111,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
           }
         }
         setError(null);
+        setNotFound(false);
         
         // Determine the department ID to use
         let apiDeptId = externalDeptId;
@@ -147,7 +150,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
             );
             
             if (!currentDept) {
-              throw new Error('Department not found');
+              setNotFound(true);
+              setDepartmentData(null);
+              return;
             }
             
             apiDeptId = currentDept.departmentId || currentDept.id;
@@ -285,6 +290,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         if ((err as Error).name === 'AbortError') return;
         const error = err as Error;
         setError(error.message || 'Failed to load department data');
+        if (!/not found/i.test(error.message || '')) {
+          emitExternalApiError();
+        }
         console.error('Error fetching department data:', err);
       } finally {
         isFetchingRef.current = false;
@@ -354,6 +362,12 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         headers: materialsHeaders
       });
       
+      if (response.status === 404) {
+        setMaterials([]);
+        setMaterialsLoaded(true);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`Failed to fetch materials: ${response.statusText}`);
       }
@@ -368,6 +382,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
       }
     } catch (err) {
       console.error('Error fetching materials:', err);
+      emitExternalApiError();
       // Don't show error to user, materials are optional
     } finally {
       setLoadingMaterials(false);
@@ -412,12 +427,16 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   }
 
   // Error state
-  if (error || !department) {
+  if (error) {
+    return <div className="min-h-screen bg-[#faf9f7]" />;
+  }
+
+  if (notFound || !department) {
     return (
       <ErrorScreen
-        title="Failed to Load"
-        message={error || 'Department not found'}
-        onRetry={() => window.location.reload()}
+        title="Department not found"
+        message="The department you're looking for doesn't exist."
+        onRetry={undefined}
       />
     );
   }

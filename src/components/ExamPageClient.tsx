@@ -8,6 +8,7 @@ import { getExamAttemptCount, getBestScore } from '@/lib/examStorage';
 import { useExamTimer, useExamData, useExamState, useExamSubmission } from '@/hooks';
 import { useNavigation } from '@/components/NavigationProvider';
 import { createClient, getSupabaseAccessToken } from '@/lib/supabase/client';
+import { emitExternalApiError } from '@/lib/externalApiError';
 import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
@@ -178,7 +179,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         .catch((err) => {
           console.error('Error auto-submitting exam after reload:', err);
           setIsSubmitting(false);
-          alert('Failed to submit exam after reload. Please try again.');
+          emitExternalApiError();
         });
     } catch (err) {
       console.error('Error parsing pending submission:', err);
@@ -270,8 +271,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       
       // Track exam start in background (non-blocking)
       if (exam?.paperId && exam?.departmentId && userId) {
-        
-        getSupabaseAccessToken().then(accessToken => {
+       getSupabaseAccessToken().then(accessToken => {
           const headers: Record<string, string> = { 'Content-Type': 'application/json' };
           if (accessToken) {
             headers['Authorization'] = `Bearer ${accessToken}`;
@@ -314,7 +314,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       }
     } catch (err) {
       console.error('Error starting exam:', err);
-      alert('Failed to start exam. Please try again.');
+      emitExternalApiError();
     } finally {
       setIsStarting(false);
     }
@@ -386,7 +386,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       } catch (err) {
         console.error('Error submitting exam:', err);
         setIsSubmitting(false); // Reset loading state on error
-        alert('Failed to submit exam. Please try again.');
+        emitExternalApiError();
         setShowSubmitConfirm(false);
         return;
       }
@@ -394,7 +394,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
     // If exam or activeExamId is missing, show error
     setIsSubmitting(false); // Reset loading state
-    alert('Unable to submit exam. Please try again.');
+    emitExternalApiError();
     setShowSubmitConfirm(false);
   }
 
@@ -438,13 +438,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   }
 
   if (error) {
-    return (
-      <ErrorScreen
-        title="Error Loading Exam"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    );
+    return <div className="min-h-screen bg-[#faf9f7]" />;
   }
 
   if (!exam) {

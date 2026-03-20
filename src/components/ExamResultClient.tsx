@@ -11,6 +11,7 @@ import QuestionReview from './QuestionReview';
 import Navbar from './common/Navbar';
 import ExamResult from './exam/ExamResult';
 import ExamResultActions from './exam/ExamResultActions';
+import { emitExternalApiError } from '@/lib/externalApiError';
 
 interface ExamResultData {
   _id: string;
@@ -90,42 +91,48 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
               fetch(API_ENDPOINTS.PAPER_ANSWERS(departmentId, paperId), { headers })
             ]);
             
-            if (questionsResponse.ok && answersResponse.ok) {
-              const questionsData = await questionsResponse.json();
-              const answersData = await answersResponse.json();
-              
-              if (questionsData.success && questionsData.data?.questions) {
-                // Create a map of correct answers from answers API
-                const correctAnswersMap = new Map<number, number>();
-                
-                if (answersData.success && answersData.data?.answers && Array.isArray(answersData.data.answers)) {
-                  // Answers are in data.answers array
-                  answersData.data.answers.forEach((ans: any) => {
-                    const questionId = ans.questionId ?? ans.id;
-                    const correctAnswer = ans.correct ?? ans.answer;
-                    correctAnswersMap.set(questionId, correctAnswer);
-                  });
-                }
-                // Map questions and merge with correct answers from answers API
-                const transformedQuestions = questionsData.data.questions.map((q: any) => ({
-                  id: q.id,
-                  question: q.question,
-                  options: q.options,
-                  details: q.details || [],
-                  correctAnswer: correctAnswersMap.get(q.id) ?? q.correctAnswer
-                }));
-                setQuestions(transformedQuestions);
+            if (!questionsResponse.ok || !answersResponse.ok) {
+              throw new Error('Failed to fetch questions or answers');
+            }
+
+            const questionsData = await questionsResponse.json();
+            const answersData = await answersResponse.json();
+
+            if (questionsData.success && questionsData.data?.questions) {
+              // Create a map of correct answers from answers API
+              const correctAnswersMap = new Map<number, number>();
+
+              if (answersData.success && answersData.data?.answers && Array.isArray(answersData.data.answers)) {
+                // Answers are in data.answers array
+                answersData.data.answers.forEach((ans: any) => {
+                  const questionId = ans.questionId ?? ans.id;
+                  const correctAnswer = ans.correct ?? ans.answer;
+                  correctAnswersMap.set(questionId, correctAnswer);
+                });
               }
+              // Map questions and merge with correct answers from answers API
+              const transformedQuestions = questionsData.data.questions.map((q: any) => ({
+                id: q.id,
+                question: q.question,
+                options: q.options,
+                details: q.details || [],
+                correctAnswer: correctAnswersMap.get(q.id) ?? q.correctAnswer
+              }));
+              setQuestions(transformedQuestions);
+            } else if (!questionsData.success) {
+              throw new Error('Invalid questions response');
             }
           } catch (err) {
             console.error('Error fetching questions or answers:', err);
             // Questions are optional for review
+            emitExternalApiError();
           }
         }
         
       } catch (err) {
         console.error('Error fetching exam result:', err);
         setError(err instanceof Error ? err.message : 'Failed to load exam results');
+        emitExternalApiError();
       } finally {
         setLoading(false);
       }
@@ -168,13 +175,7 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
   }
 
   if (error) {
-    return (
-      <ErrorScreen
-        title="Error Loading Results"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    );
+    return <div className="min-h-screen bg-[#faf9f7]" />;
   }
 
   if (!resultData) {
