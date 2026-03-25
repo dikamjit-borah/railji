@@ -8,6 +8,7 @@ import { departmentCache } from '@/lib/departmentCache';
 import Navbar from '@/components/common/Navbar';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
 import { emitExternalApiError } from '@/lib/externalApiError';
+import { apiFetch } from '@/lib/apiUtil';
 
 const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
 
@@ -24,6 +25,7 @@ interface Department {
   };
   paperCount: number;
   materialCount: number;
+  hasAccess: boolean;
 }
 
 // Defined at module level — not recreated on every render
@@ -55,6 +57,7 @@ function mapDepartments(raw: any[]): Department[] {
       paperCount: dept.paperCount || 0,
       materialCount: dept.materialCount || 0,
       departmentId: dept.departmentId,
+      hasAccess: dept.hasAccess || false,
     };
   });
 }
@@ -77,12 +80,7 @@ export default function DepartmentsPage() {
         }
 
         // Fetch from API on cache miss
-        const response = await fetch(API_ENDPOINTS.DEPARTMENTS);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch departments: ${response.statusText}`);
-        }
-
-        const apiData = await response.json();
+        const apiData = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
         const raw = apiData.data || [];
 
         departmentCache.set({ departments: raw });
@@ -150,7 +148,7 @@ export default function DepartmentsPage() {
         {/* Departments Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pb-6">
           {departments.map((dept, index) => {
-            const isSubscribed = SUBSCRIBED_DEPARTMENTS.has(dept.id);
+            const isSubscribed = dept.hasAccess;
 
             return (
             <Link

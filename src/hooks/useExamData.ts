@@ -6,6 +6,7 @@ import { Question, Exam } from '@/lib/types';
 import { departmentCache } from '@/lib/departmentCache';
 import { getSupabaseAccessToken } from '@/lib/supabase/client';
 import { emitExternalApiError } from '@/lib/externalApiError';
+import { apiFetch } from '@/lib/apiUtil';
 
 interface UseExamDataProps {
   examId: string;
@@ -75,12 +76,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
     // Fetch from API
     try {
-      const response = await fetch(API_ENDPOINTS.DEPARTMENTS);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch departments: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
       const departments = data.data || [];
 
       // Cache for future use
@@ -101,11 +97,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
   const fetchPaperAndQuestions = useCallback(async (departmentId: string): Promise<{ paper: any; departmentId: string } | null> => {
     try {
       setQuestionsLoading(true);
-      const headers = await getAuthHeaders();
-      const response = await fetch(API_ENDPOINTS.PAPER_QUESTIONS(departmentId, examId), { headers });
-      if (!response.ok) return null;
-
-      const data = await response.json();
+      const data = await apiFetch(API_ENDPOINTS.PAPER_QUESTIONS(departmentId, examId));
       if (data.success && data.data?.paperDetails) {
         // Cache the questions while we're at it
         if (data.data.questions) {
@@ -121,7 +113,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
     } finally {
       setQuestionsLoading(false);
     }
-  }, [examId, getAuthHeaders, transformQuestions]);
+  }, [examId, transformQuestions]);
 
   // Search all departments for the paper (fallback)
   const searchAllDepartments = useCallback(async (): Promise<{ paper: any; departmentId: string } | null> => {
@@ -130,9 +122,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
     if (departments.length === 0) {
       try {
-        const response = await fetch(API_ENDPOINTS.DEPARTMENTS);
-        if (!response.ok) throw new Error('Failed to fetch departments');
-        const data = await response.json();
+        const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
         departments = data.data || [];
       } catch {
         return null;
@@ -163,11 +153,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
     setQuestionsLoading(true);
     try {
-      const headers = await getAuthHeaders();
-      const response = await fetch(API_ENDPOINTS.PAPER_QUESTIONS(exam.departmentId, exam.paperId), { headers });
-      if (!response.ok) throw new Error('Failed to load questions');
-
-      const data = await response.json();
+      const data = await apiFetch(API_ENDPOINTS.PAPER_QUESTIONS(exam.departmentId, exam.paperId));
       if (data.success && data.data?.questions) {
         const transformed = transformQuestions(data.data.questions);
         setQuestions(transformed);
@@ -186,11 +172,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
     }
 
     try {
-      const headers = await getAuthHeaders();
-      const response = await fetch(API_ENDPOINTS.PAPER_ANSWERS(exam.departmentId, exam.paperId), { headers });
-      if (!response.ok) return new Map();
-
-      const data = await response.json();
+      const data = await apiFetch(API_ENDPOINTS.PAPER_ANSWERS(exam.departmentId, exam.paperId));
       if (data.success && data.data?.answers) {
         const answersMap = new Map<number, number>();
         data.data.answers.forEach((ans: { id: number; correct: number }) => {
@@ -243,9 +225,8 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
         if (isGeneralPaper) {
           try {
-            const response = await fetch(API_ENDPOINTS.DEPARTMENTS);
-            if (response.ok) {
-              const data = await response.json();
+            const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
+            if (data.success) {
               const departments = data.data || [];
               const generalDept = departments.find((d: any) =>
                 d.name?.toLowerCase() === 'general' || d.slug?.toLowerCase() === 'general'

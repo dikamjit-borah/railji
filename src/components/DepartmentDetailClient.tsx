@@ -5,7 +5,6 @@ import { useNavigation } from '@/components/NavigationProvider';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
-import { getSupabaseAccessToken } from '@/lib/supabase/client';
 import { emitExternalApiError } from '@/lib/externalApiError';
 import dynamic from 'next/dynamic';
 import ErrorScreen from './common/ErrorScreen';
@@ -16,6 +15,7 @@ import FilterSection from './department/FilterSection';
 import PaperCard from './department/PaperCard';
 import MaterialCard from './department/MaterialCard';
 import MaterialViewer from './department/MaterialViewer';
+import { apiFetch, ApiError } from '@/lib/apiUtil';
 
 const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
 
@@ -128,13 +128,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
             setExternalDeptId(apiDeptId);
           } else {
             // Not in cache, fetch from API
-            const deptsResponse = await fetch(API_ENDPOINTS.DEPARTMENTS, { signal });
-            
-            if (!deptsResponse.ok) {
-              throw new Error(`Failed to fetch departments: ${deptsResponse.statusText}`);
-            }
-            
-            const deptsData = await deptsResponse.json();
+            const deptsData = await apiFetch(API_ENDPOINTS.DEPARTMENTS, { signal });
             const departments = deptsData.data || [];
             
             // Cache the data for future use
@@ -184,17 +178,8 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
           papersUrl += `?paperType=full&page=${page}&sortBy=${apiSortBy}&sortOrder=${sortOrder}`;
         }
         
-        const accessToken = await getSupabaseAccessToken();
-        const papersHeaders = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
-
         // Fetch papers from external API
-        const papersResponse = await fetch(papersUrl, { signal, headers: papersHeaders });
-        
-        if (!papersResponse.ok) {
-          throw new Error(`Failed to fetch papers: ${papersResponse.statusText}`);
-        }
-        
-        const papersData = await papersResponse.json();
+        const papersData = await apiFetch(papersUrl, { signal });
         
         // Extract filters from metadata
         const metadata = papersData.data?.metadata || {};
@@ -229,6 +214,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
           usersAttempted: paper.usersAttempted || 0,
           rating: paper.rating || 4.0,
           isFree: paper.isFree !== undefined ? paper.isFree : false,
+          hasAccess: paper.hasAccess || false,
           isNew: paper.isNew || false,
           subjects: [],
           examId: paper.paperId || paper._id,
@@ -355,24 +341,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
     try {
       setLoadingMaterials(true);
 
-      const accessToken = await getSupabaseAccessToken();
-      const materialsHeaders = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
-
-      const response = await fetch(API_ENDPOINTS.MATERIALS(idToUse), {
-        headers: materialsHeaders
-      });
-      
-      if (response.status === 404) {
-        setMaterials([]);
-        setMaterialsLoaded(true);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch materials: ${response.statusText}`);
-      }
-      
-      const result = await response.json();
+      const result = await apiFetch(API_ENDPOINTS.MATERIALS(idToUse));
       
       if (result.success && result.data) {
         // Transform materials to internal format
@@ -381,6 +350,11 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         setMaterialsLoaded(true);
       }
     } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        setMaterials([]);
+        setMaterialsLoaded(true);
+        return;
+      }
       console.error('Error fetching materials:', err);
       emitExternalApiError();
       // Don't show error to user, materials are optional
@@ -533,7 +507,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                   <div className="flex flex-col items-center gap-3">
                     <svg className="animate-spin h-10 w-10 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-65" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path className="opacity-55" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     <span className="text-stone-700 font-medium">Loading papers...</span>
                   </div>
@@ -611,7 +585,9 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                       key={paper.id}
                       paper={paper}
                       index={index}
-                      isLocked={index === 0} // static lock on first paper for demo purposes
+                      isLocked={!paper.hasAccess}
+                      departmentName={department?.name}
+                      upgradeHref={`/subscription?dept=${slug}`}
                       href={`/exam/${paper.examId}?dept=${paperTypeFilter === 'general' ? 'general' : slug}`}
                     />
                   ))
@@ -625,7 +601,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                     <div className="flex items-center gap-3">
                       <svg className="animate-spin h-6 w-6 text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-65" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <path className="opacity-55" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       <span className="text-stone-600 text-sm font-medium">Loading more papers...</span>
                     </div>

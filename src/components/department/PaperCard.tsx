@@ -6,6 +6,8 @@ interface PaperCardProps {
   index: number;
   href: string;
   isLocked?: boolean;
+  upgradeHref?: string;
+  departmentName?: string;
 }
 
 const formatAttempts = (num: number | undefined) => {
@@ -16,10 +18,20 @@ const formatAttempts = (num: number | undefined) => {
   return num.toString();
 };
 
-export default function PaperCard({ paper, index, href, isLocked = false }: PaperCardProps) {
+export default function PaperCard({
+  paper,
+  index,
+  href,
+  isLocked = false,
+  upgradeHref,
+  departmentName,
+}: PaperCardProps) {
+  const targetHref = isLocked && upgradeHref ? upgradeHref : href;
+  const requiredPlanCopy = `${departmentName || 'This'} dept. subscription required`;
+
   return (
     <Link
-      href={href}
+      href={targetHref}
       className="relative w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 text-left shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 group border border-stone-100 overflow-hidden block"
       style={{ animationDelay: `${index * 50}ms` }}
     >
@@ -42,7 +54,7 @@ export default function PaperCard({ paper, index, href, isLocked = false }: Pape
               Subscribe to Attempt
             </h4>
             <p className="text-stone-500 text-xs mb-4">
-              Civil dept. subscription required
+              {requiredPlanCopy}
             </p>
             <div className="inline-flex items-center gap-1.5 rounded-full px-6 py-2.5 sm:px-7 sm:py-3 bg-gradient-to-r from-[#D75C37] to-[#DF7F2D] text-white font-semibold text-sm shadow-[0_8px_20px_rgba(215,92,55,0.3)]">
                <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>

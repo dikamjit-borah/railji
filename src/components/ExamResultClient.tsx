@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { Question } from '@/lib/types';
-import { getSupabaseAccessToken } from '@/lib/supabase/client';
 import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import QuestionReview from './QuestionReview';
@@ -12,6 +11,7 @@ import Navbar from './common/Navbar';
 import ExamResult from './exam/ExamResult';
 import ExamResultActions from './exam/ExamResultActions';
 import { emitExternalApiError } from '@/lib/externalApiError';
+import { apiFetch } from '@/lib/apiUtil';
 
 interface ExamResultData {
   _id: string;
@@ -65,15 +65,7 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
         setError(null);
 
         // Fetch exam result
-        const accessToken = await getSupabaseAccessToken();
-        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
-
-        const response = await fetch(API_ENDPOINTS.EXAM_RESULT(examId), { headers });
-        if (!response.ok) {
-          throw new Error('Failed to fetch exam results');
-        }
-
-        const data = await response.json();
+        const data = await apiFetch(API_ENDPOINTS.EXAM_RESULT(examId));
         if (!data.success || !data.data) {
           throw new Error('Invalid response from server');
         }
@@ -86,17 +78,10 @@ export default function ExamResultClient({ examId }: ExamResultClientProps) {
         if (departmentId && paperId) {
           try {
             // Fetch both questions and answers in parallel
-            const [questionsResponse, answersResponse] = await Promise.all([
-              fetch(API_ENDPOINTS.PAPER_QUESTIONS(departmentId, paperId), { headers }),
-              fetch(API_ENDPOINTS.PAPER_ANSWERS(departmentId, paperId), { headers })
+            const [questionsData, answersData] = await Promise.all([
+              apiFetch(API_ENDPOINTS.PAPER_QUESTIONS(departmentId, paperId)),
+              apiFetch(API_ENDPOINTS.PAPER_ANSWERS(departmentId, paperId))
             ]);
-            
-            if (!questionsResponse.ok || !answersResponse.ok) {
-              throw new Error('Failed to fetch questions or answers');
-            }
-
-            const questionsData = await questionsResponse.json();
-            const answersData = await answersResponse.json();
 
             if (questionsData.success && questionsData.data?.questions) {
               // Create a map of correct answers from answers API

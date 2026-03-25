@@ -43,6 +43,7 @@ export interface ExamPaper {
   totalQuestions?: number;
   passMarks?: number;
   negativeMarking?: number;
+  hasAccess?: boolean;
 }
 
 export interface Exam {
