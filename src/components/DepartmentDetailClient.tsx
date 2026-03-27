@@ -524,19 +524,19 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                 <div className="flex items-center gap-3 text-stone-700 text-sm relative" ref={sortDropdownRef}>
                   <button 
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="px-2 py-1 lg:px-4 lg:py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-1.5 lg:gap-2"
+                    className="px-1.5 py-1 sm:px-2 sm:py-1 lg:px-4 lg:py-2 rounded-lg hover:bg-stone-200 transition-colors flex items-center gap-1 sm:gap-1.5 lg:gap-2"
                   >
-                    <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
                     </svg>
-                    <span className="text-xs lg:text-sm">Sort: {sortBy === 'name' ? 'Name' : 'Date'}</span>
-                    <svg className={`w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="text-xxs sm:text-xs lg:text-sm">Sort: {sortBy === 'name' ? 'Name' : 'Date'}</span>
+                    <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
                   
                   {showSortDropdown && (
-                    <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-stone-200 py-2 min-w-[150px] z-50">
+                    <div className="absolute top-full right-0 mt-1.5 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 min-w-[110px] sm:min-w-[130px] lg:min-w-[150px] z-50">
                       <button
                         onClick={() => {
                           setSortBy('date');
@@ -544,7 +544,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                           setHasMore(true);
                           setShowSortDropdown(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
+                        className={`w-full text-left px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xxs sm:text-xs lg:text-sm hover:bg-orange-50 transition-colors ${
                           sortBy === 'date'
                             ? 'bg-orange-100 text-orange-700 font-medium'
                             : 'text-stone-700'
@@ -559,7 +559,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
                           setHasMore(true);
                           setShowSortDropdown(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-colors ${
+                        className={`w-full text-left px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xxs sm:text-xs lg:text-sm hover:bg-orange-50 transition-colors ${
                           sortBy === 'name'
                             ? 'bg-orange-100 text-orange-700 font-medium'
                             : 'text-stone-700'

@@ -20,7 +20,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     if (typeof window !== 'undefined') {
       window.location.href = '/auth/signin';
     }
