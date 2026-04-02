@@ -5,6 +5,7 @@ import { useNavigation } from '@/components/NavigationProvider';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import { ExamPaper, Material, DepartmentInfo, DepartmentData } from '@/lib/types';
+import { getSupabaseAccessToken } from '@/lib/supabase/client';
 import dynamic from 'next/dynamic';
 import ErrorScreen from './common/ErrorScreen';
 import DepartmentHeader from './department/DepartmentHeader';
@@ -178,8 +179,11 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
           papersUrl += `?paperType=full&page=${page}&sortBy=${apiSortBy}&sortOrder=${sortOrder}`;
         }
         
+        const accessToken = await getSupabaseAccessToken();
+        const papersHeaders = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
+
         // Fetch papers from external API
-        const papersResponse = await fetch(papersUrl, { signal });
+        const papersResponse = await fetch(papersUrl, { signal, headers: papersHeaders });
         
         if (!papersResponse.ok) {
           throw new Error(`Failed to fetch papers: ${papersResponse.statusText}`);

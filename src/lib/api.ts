@@ -1,13 +1,13 @@
 // API utilities for Rail-Jee
 import { API_ENDPOINTS } from './apiConfig';
 
-export interface CreateUserPayload {
+export interface UserProfilePayload {
   supabaseId: string;
   email: string;
   username: string;
 }
 
-export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean; error?: string }> {
+export async function syncUserProfile(payload: UserProfilePayload): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(API_ENDPOINTS.USERS, {
       method: 'POST',

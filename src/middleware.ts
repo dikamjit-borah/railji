@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname.startsWith('/auth')
   const isApiRoute = pathname.startsWith('/api')
   const isHomePage = pathname === '/'
-  const isPublicPage = pathname === '/privacy-policy' || pathname === '/terms-of-service' || pathname === '/about' || pathname === '/contact'
+  const isPublicPage = pathname === '/privacy-policy' || pathname === '/terms-of-service' || pathname === '/about' || pathname === '/contact' || pathname === '/departments'
   const isProtectedRoute = !isHomePage && !isAuthPage && !isApiRoute && !isPublicPage
 
   // Use getSession() in middleware — reads JWT from cookie without a network call.
