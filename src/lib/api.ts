@@ -2,13 +2,13 @@
 import { API_ENDPOINTS } from './apiConfig';
 import { emitExternalApiError } from './externalApiError';
 
-export interface UserProfilePayload {
+export interface CreateUserPayload {
   supabaseId: string;
   email: string;
   username: string;
 }
 
-export async function syncUserProfile(payload: UserProfilePayload): Promise<{ success: boolean; error?: string }> {
+export async function createUser(payload: CreateUserPayload): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(API_ENDPOINTS.USERS, {
       method: 'POST',
