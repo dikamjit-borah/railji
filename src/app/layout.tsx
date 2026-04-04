@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Plus_Jakarta_Sans, Tiro_Devanagari_Hindi } from 'next/font/google';
 import "./globals.css";
 import { NavigationProvider } from "@/components/NavigationProvider";
+import ExternalApiErrorProvider from "@/components/common/ExternalApiErrorProvider";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -45,7 +46,9 @@ export default function RootLayout({
       <body className="antialiased">
         <Suspense>
           <NavigationProvider>
-            {children}
+            <ExternalApiErrorProvider>
+              {children}
+            </ExternalApiErrorProvider>
           </NavigationProvider>
         </Suspense>
       </body>

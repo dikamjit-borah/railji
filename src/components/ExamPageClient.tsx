@@ -7,7 +7,8 @@ import { ExamMode } from '@/lib/examTypes';
 import { getExamAttemptCount, getBestScore } from '@/lib/examStorage';
 import { useExamTimer, useExamData, useExamState, useExamSubmission } from '@/hooks';
 import { useNavigation } from '@/components/NavigationProvider';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, getSupabaseAccessToken } from '@/lib/supabase/client';
+import { emitExternalApiError } from '@/lib/externalApiError';
 import LoadingScreen from './LoadingScreen';
 import ErrorScreen from './common/ErrorScreen';
 import ExamInstructions from './exam/ExamInstructions';
@@ -24,7 +25,6 @@ interface PendingSubmission {
   activeExamId: string;
   paperId: string;
   departmentId: string;
-  userId: string;
   answers: (number | null)[];
   markedForReview: boolean[];
   timeRemaining: number;
@@ -123,11 +123,6 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       // Only process if it matches the current exam
       if (pending.examId !== examId) return;
 
-      const resolvedUserId = pending.userId || userId;
-      if (!resolvedUserId) {
-        return;
-      }
-
       // Remove immediately to prevent re-processing once we're ready to submit
       sessionStorage.removeItem(PENDING_SUBMISSION_KEY);
 
@@ -143,18 +138,24 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         isFlagged: pending.markedForReview[index] || false,
       }));
 
-      fetch(API_ENDPOINTS.SUBMIT_EXAM, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          examId: pending.activeExamId,
-          userId: resolvedUserId,
-          paperId: pending.paperId,
-          departmentId: pending.departmentId,
-          attemptedQuestions: attempted,
-          unattemptedQuestions: unattempted,
-          responses,
-        }),
+      getSupabaseAccessToken().then(accessToken => {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+        
+        return fetch(API_ENDPOINTS.SUBMIT_EXAM, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            examId: pending.activeExamId,
+            paperId: pending.paperId,
+            departmentId: pending.departmentId,
+            attemptedQuestions: attempted,
+            unattemptedQuestions: unattempted,
+            responses,
+          }),
+        });
       })
         .then((res) => {
           if (!res.ok) throw new Error('Submit failed');
@@ -171,7 +172,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
         .catch((err) => {
           console.error('Error auto-submitting exam after reload:', err);
           setIsSubmitting(false);
-          alert('Failed to submit exam after reload. Please try again.');
+          emitExternalApiError();
         });
     } catch (err) {
       console.error('Error parsing pending submission:', err);
@@ -207,13 +208,12 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       }
 
       // Save current exam state so it can be submitted after reload
-      if (exam && activeExamId && questions.length > 0 && exam.paperId && exam.departmentId && userId) {
+      if (exam && activeExamId && questions.length > 0 && exam.paperId && exam.departmentId) {
         const pendingData: PendingSubmission = {
           examId,
           activeExamId,
           paperId: exam.paperId,
           departmentId: exam.departmentId,
-          userId,
           answers: answersRef.current,
           markedForReview: markedForReviewRef.current,
           timeRemaining: timeRemainingRef.current,
@@ -263,18 +263,23 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       
       // Track exam start in background (non-blocking)
       if (exam?.paperId && exam?.departmentId && userId) {
-        
-        fetch(API_ENDPOINTS.START_EXAM, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            paperId: exam.paperId,
-            departmentId: exam.departmentId,
-            examMode:mode,
-          }),
+       getSupabaseAccessToken().then(accessToken => {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
+          }
+          
+          return fetch(API_ENDPOINTS.START_EXAM, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              paperId: exam.paperId,
+              departmentId: exam.departmentId,
+              examMode:mode,
+            }),
+          });
         }).then(response => {
-          if (response.ok) {
+          if (response && response.ok) {
             return response.json();
           }
         }).then(startData => {
@@ -300,7 +305,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       }
     } catch (err) {
       console.error('Error starting exam:', err);
-      alert('Failed to start exam. Please try again.');
+      emitExternalApiError();
     } finally {
       setIsStarting(false);
     }
@@ -332,12 +337,17 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
           isFlagged: examState.markedForReview[index] || false
         }));
         
+        const accessToken = await getSupabaseAccessToken();
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+        
         const submitResponse = await fetch(API_ENDPOINTS.SUBMIT_EXAM, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             examId: activeExamId,
-            userId,
             paperId: exam.paperId,
             departmentId: exam.departmentId,
             attemptedQuestions: result.totalQuestions - result.skippedQuestions,
@@ -366,7 +376,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
       } catch (err) {
         console.error('Error submitting exam:', err);
         setIsSubmitting(false); // Reset loading state on error
-        alert('Failed to submit exam. Please try again.');
+        emitExternalApiError();
         setShowSubmitConfirm(false);
         return;
       }
@@ -374,7 +384,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
 
     // If exam or activeExamId is missing, show error
     setIsSubmitting(false); // Reset loading state
-    alert('Unable to submit exam. Please try again.');
+    emitExternalApiError();
     setShowSubmitConfirm(false);
   }
 
@@ -418,13 +428,7 @@ export default function ExamPageClient({ examId }: ExamPageClientProps) {
   }
 
   if (error) {
-    return (
-      <ErrorScreen
-        title="Error Loading Exam"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    );
+    return <div className="min-h-screen bg-[#faf9f7]" />;
   }
 
   if (!exam) {

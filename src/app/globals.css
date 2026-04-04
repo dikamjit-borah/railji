@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(0); }
+  70%  { transform: translateX(var(--marquee-distance, -60%)); }
+  90%  { transform: translateX(var(--marquee-distance, -60%)); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 3.5s ease-in-out infinite;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #1c1917;

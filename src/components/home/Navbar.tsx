@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import UserMenu from '@/components/common/UserMenu';
-import NavbarMobileMenu from '@/components/home/NavbarMobileMenu';
 
 interface NavbarProps {
   user?: any;
@@ -61,9 +60,10 @@ export default function Navbar({ user }: NavbarProps) {
               <>
                 <Link
                   href="/departments"
-                  className="hidden sm:inline-flex px-4 lg:px-5 py-2 lg:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-full hover:from-orange-600 hover:to-orange-700 transition-all duration-300"
+                  className="inline-flex px-2.5 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 text-xxs sm:text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-full hover:from-orange-600 hover:to-orange-700 transition-all duration-300"
                 >
-                  Go to Exams
+                  <span className="sm:hidden">Exams</span>
+                  <span className="hidden sm:inline">Go to Exams</span>
                 </Link>
                 <UserMenu user={user} navItems={navItems.filter(i => !i.href.includes('stats'))} />
               </>
@@ -81,8 +81,6 @@ export default function Navbar({ user }: NavbarProps) {
                 >
                   Sign Up
                 </Link>
-                {/* Hamburger only for guests — logged-in users use UserMenu */}
-                <NavbarMobileMenu navItems={navItems} />
               </>
             )}
           </div>

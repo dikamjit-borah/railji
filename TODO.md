@@ -44,3 +44,61 @@ Keep the current exam flow (`/exam/[examId]`) completely untouched. Add a separa
 - [ ] Percentage logic to link and work from backend to frontend properly.
 - [ ] A delay going from exam review to start even if the data is already preloaded.
 - [ ] Department logic flow with refresh and cache check it properly all the cases.
+
+---
+
+## Future Plan: Stale-While-Revalidate + ETag Caching for Department Data
+
+### Overview
+Upgrade the current `sessionStorage`-based department cache to support background revalidation using HTTP ETags, so the UI always renders instantly from cache while staying in sync with server data after deployments or data changes — without any loading spinners.
+
+### How it should work
+- On page load, **render immediately from `sessionStorage`** — zero network wait, UI unaffected.
+- **Simultaneously fire a background `GET /api/departments`** request with `If-None-Match: "<stored-etag>"` header.
+- If server returns **304 Not Modified** → do nothing, cache is still fresh.
+- If server returns **200 + new ETag** → silently update `sessionStorage` with new data + new ETag. Optionally re-render if data actually changed.
+- User never sees a loading state for the background revalidation.
+
+### Implementation Steps
+1. **Backend** — Add ETag generation to the departments endpoint:
+   - Generate ETag as `md5(JSON.stringify(departments))` or better, use `max(updatedAt)` from the DB.
+   - Check `If-None-Match` header → return `304` if it matches, else return `200` with new `ETag` response header.
+   - Set `Cache-Control: no-cache` (means revalidate before use, not "don't cache").
+
+2. **`departmentCache.ts`** — Extend the cache to store and retrieve ETags:
+   - Add `etag?: string` to `CachedDepartmentData` interface.
+   - Update `set(data, etag?)` to persist the ETag alongside departments.
+   - Add `getEtag(): string | null` method.
+
+3. **`departments/page.tsx`** — Implement stale-while-revalidate:
+   - If cache hit → render immediately, then call `revalidateInBackground(etag)` (fire and forget).
+   - If cache miss → normal blocking fetch as today.
+   - `revalidateInBackground` sends conditional request; on `304` exits silently; on `200` updates cache and optionally calls `setDepartments()`.
+
+4. **`apiFetch` / raw `fetch`** — The background revalidation needs raw `fetch` (not the current `apiFetch` wrapper) to access response headers for the new ETag value. Either extend `apiFetch` to return headers or use `fetch` directly for this one call.
+
+5. **`DepartmentDetailClient.tsx` and `useExamData.ts`** — These also use the cache; they benefit automatically once cache is updated by the background revalidation on the departments list page.
+
+### What This Replaces / Augments
+- Replaces the current hard 30-minute TTL expiry with server-authoritative invalidation.
+- Combines with the existing logout cache clear (`departmentCache.clear()`) already in place.
+- Makes the **Build-time Deploy ID** approach (option 2) unnecessary since ETag handles server-side changes automatically.
+
+### Three Cache Tiers After Implementation
+| Scenario | User Experience | Network |
+|---|---|---|
+| Cache hit, data unchanged (304) | Instant render, nothing updates | 1 lightweight request, empty body |
+| Cache hit, data changed (200) | Instant render → silent update | 1 full request (background) |
+| Cache miss (first visit / logout) | Loading spinner → render | 1 full request (blocking) |
+
+### Key Constraints
+- Background revalidation must **never block the UI** — fire and forget, no `await` on the render path.
+- Only update `setDepartments()` state if the new data is actually different (compare by ETag, not deep equality).
+- ETag must be stored in `sessionStorage` alongside the data, not in memory (survives page refreshes within session).
+- This pattern is identical to what **SWR** (`stale-while-revalidate`) and **React Query** do internally.
+
+### Reference
+- HTTP ETag spec: RFC 9110 (HTTP Semantics)
+- Stale-While-Revalidate directive: RFC 5861
+- Production usage: GitHub API, Google APIs, Cloudflare CDN edge caching
+- Discussed on: 2026-03-26

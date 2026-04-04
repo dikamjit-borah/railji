@@ -162,7 +162,7 @@ export default function FilterSection({
 
                 {/* Dropdown Menu */}
                 {showOthersDropdown && (
-                  <div className="absolute top-full mt-1.5 left-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full mt-1.5 right-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
                     {otherExamTypes.map((type) => (
                       <button
                         key={type}
@@ -172,7 +172,7 @@ export default function FilterSection({
                         }}
                         className={`w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xxs sm:text-xs hover:bg-orange-50 transition-colors ${
                           paperTypeFilter === 'sectional' && selectedPaperCode === type
-                            ? 'bg-orange-50 text-orange-700 font-medium'
+                            ? 'bg-orange-100 text-orange-700 font-medium'
                             : 'text-stone-700'
                         }`}
                       >
@@ -186,7 +186,7 @@ export default function FilterSection({
 
             {/* General Papers Dropdown - Pushed to the right on sm+, new row left-aligned on mobile */}
             {allGeneralPapers.length > 0 && (
-              <div className="relative basis-full sm:basis-auto sm:ml-auto" ref={generalDropdownRef}>
+              <div className="relative ml-auto" ref={generalDropdownRef}>
                 <button
                   onClick={() => {
                     onToggleGeneralDropdown?.();
@@ -215,7 +215,7 @@ export default function FilterSection({
 
                 {/* General Papers Dropdown Menu */}
                 {showGeneralDropdown && (
-                  <div className="absolute top-full mt-1.5 left-0 sm:left-auto sm:right-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full mt-1.5 right-0 bg-white rounded-lg sm:rounded-xl shadow-2xl border border-stone-200 py-1 sm:py-2 w-[140px] sm:w-[160px] lg:w-[180px] z-50 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
                     {allGeneralPapers.map((paper) => (
                       <button
                         key={paper}
@@ -225,7 +225,7 @@ export default function FilterSection({
                         }}
                         className={`w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 text-xxs sm:text-xs hover:bg-amber-50 transition-colors ${
                           paperTypeFilter === 'general' && selectedPaperCode === paper
-                            ? 'bg-amber-50 text-amber-700 font-medium'
+                            ? 'bg-amber-100 text-amber-700 font-medium'
                             : 'text-stone-700'
                         }`}
                       >

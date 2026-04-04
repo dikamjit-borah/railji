@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { departmentCache } from '@/lib/departmentCache'
 import Navbar from '@/components/common/Navbar'
 import Link from 'next/link'
 
@@ -31,6 +32,7 @@ export default function SignInPage() {
 
       if (error) throw error
 
+      departmentCache.clear()
       // Keep loading=true so the spinner stays visible during navigation
       router.push(redirectTo)
       router.refresh()
@@ -45,6 +47,7 @@ export default function SignInPage() {
     setGoogleLoading(true)
     setError('')
     try {
+      departmentCache.clear()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import ContactForm from './ContactForm';
 
 export const metadata = {
-  title: 'Contact Us - RailJee',
+  title: 'Contact Us | RailJee',
   description: 'Get in touch with the RailJee team. We\'re here to help with your railway exam preparation journey.',
 };
 

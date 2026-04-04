@@ -7,6 +7,8 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import Navbar from '@/components/common/Navbar';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
+import { emitExternalApiError } from '@/lib/externalApiError';
+import { apiFetch } from '@/lib/apiUtil';
 
 const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
 
@@ -23,6 +25,7 @@ interface Department {
   };
   paperCount: number;
   materialCount: number;
+  hasAccess: boolean;
 }
 
 // Defined at module level — not recreated on every render
@@ -39,6 +42,8 @@ const COLOR_MAP: Record<string, { gradient: string; bg: string }> = {
   metro:    { gradient: 'from-red-600 to-red-700', bg: 'bg-red-50' },
 };
 
+const SUBSCRIBED_DEPARTMENTS = new Set(['mechanical']); // Static for demo purposes, ideally fetched from user profile
+
 function mapDepartments(raw: any[]): Department[] {
   return raw.map((dept) => {
     const deptId = dept.slug || dept.id || dept.departmentId || dept.name?.toLowerCase();
@@ -52,6 +57,7 @@ function mapDepartments(raw: any[]): Department[] {
       paperCount: dept.paperCount || 0,
       materialCount: dept.materialCount || 0,
       departmentId: dept.departmentId,
+      hasAccess: dept.hasAccess || false,
     };
   });
 }
@@ -74,18 +80,14 @@ export default function DepartmentsPage() {
         }
 
         // Fetch from API on cache miss
-        const response = await fetch(API_ENDPOINTS.DEPARTMENTS);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch departments: ${response.statusText}`);
-        }
-
-        const apiData = await response.json();
+        const apiData = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
         const raw = apiData.data || [];
 
         departmentCache.set({ departments: raw });
         setDepartments(mapDepartments(raw));
       } catch (err) {
         setError((err as Error).message || 'Failed to load departments');
+        emitExternalApiError();
       } finally {
         setLoading(false);
       }
@@ -108,23 +110,7 @@ export default function DepartmentsPage() {
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <svg className="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h2 className="text-2xl font-bold text-stone-900 mb-2">Failed to Load</h2>
-          <p className="text-stone-600 mb-6">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-[#faf9f7]" />;
   }
 
   return (
@@ -161,7 +147,10 @@ export default function DepartmentsPage() {
 
         {/* Departments Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pb-6">
-          {departments.map((dept, index) => (
+          {departments.map((dept, index) => {
+            const isSubscribed = dept.hasAccess;
+
+            return (
             <Link
               key={dept.id}
               href={`/departments/${dept.id}`}
@@ -183,10 +172,32 @@ export default function DepartmentsPage() {
               {/* Content */}
               <div className="relative z-10 h-full flex flex-col justify-between min-h-[90px] sm:min-h-[130px] lg:min-h-[140px]">
                 <div>
-                  <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white mb-0.5 sm:mb-1 leading-tight">
-                    {dept.name}
-                  </h3>
-                  <p className="text-white/70 text-xxs sm:text-xs line-clamp-2 sm:block">
+                  <div className="flex items-start justify-between gap-2 mb-0.5 sm:mb-1">
+                    <h3 className="text-sm sm:text-base lg:text-lg font-bold text-white leading-tight">
+                      {dept.name}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 py-px sm:px-2 sm:py-0.5 text-[7px] sm:text-[10px] font-semibold uppercase tracking-tight sm:tracking-wide border shadow-sm whitespace-nowrap ${
+                        isSubscribed
+                          ? 'bg-emerald-500/90 border-emerald-300/80 text-white shadow-emerald-900/20'
+                          : 'bg-white/20 border-white/30 text-white/90 backdrop-blur-sm'
+                      }`}
+                    >
+                      {isSubscribed ? (
+                        <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-2 h-2 sm:w-2.5 sm:h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 11V8.5a4 4 0 118 0V11" />
+                          <rect x="5" y="11" width="14" height="10" rx="2.5" strokeWidth={1.8} />
+                          <circle cx="12" cy="16" r="1" fill="currentColor" stroke="none" />
+                        </svg>
+                      )}
+                      {isSubscribed ? 'Subscribed' : 'Preview'}
+                    </span>
+                  </div>
+                  <p className="text-white/70 text-xxs sm:text-xs line-clamp-2">
                     {dept.description}
                   </p>
                 </div>
@@ -211,7 +222,7 @@ export default function DepartmentsPage() {
               {/* Hover Shine Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full pointer-events-none" />
             </Link>
-          ))}
+          )})}
         </div>
       </main>
     </div>

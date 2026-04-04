@@ -43,6 +43,7 @@ export interface ExamPaper {
   totalQuestions?: number;
   passMarks?: number;
   negativeMarking?: number;
+  hasAccess?: boolean;
 }
 
 export interface Exam {
@@ -77,6 +78,7 @@ export interface DepartmentInfo {
   color: DepartmentColor;
   paperCount?: number;
   materialCount?: number;
+  hasAccess?: boolean;
 }
 
 export interface DepartmentData {

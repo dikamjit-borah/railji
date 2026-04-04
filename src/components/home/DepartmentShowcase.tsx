@@ -53,7 +53,7 @@ export default function DepartmentShowcase({ departments: rawDepartments = [] }:
               <h3 className="font-bold text-stone-900 mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base leading-tight">
                 {dept.name}
               </h3>
-              <p className="text-xs text-stone-500 leading-snug">
+              <p className="text-xs text-stone-500 leading-snug line-clamp-2">
                 {dept.description}
               </p>
 
