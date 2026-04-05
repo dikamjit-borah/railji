@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SITE_STATS } from '@/lib/constants/siteStats';
 
 export default function Hero() {
 
@@ -44,16 +45,16 @@ export default function Hero() {
             <div className="mt-3 sm:mt-12 pt-2 sm:pt-8 border-t-0 sm:border-t border-stone-200">
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-8 lg:gap-12">
                 <div>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">7+</div>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">{SITE_STATS.departments}</div>
                   <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Departments</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-4">50+</div>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-4">{SITE_STATS.examPapers}</div>
                   <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Exam Papers</div>
                 </div>
                 <div>
-                  <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">Bilingual</div>
-                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1  md:pl-2">Hindi & English</div>
+                  <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">{SITE_STATS.languageDisplay}</div>
+                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1  md:pl-2">{SITE_STATS.languageNames}</div>
                 </div>
               </div>
             </div>
@@ -93,7 +94,7 @@ export default function Hero() {
               {/* Floating Elements */}
               <div className="absolute -top-3 -right-3 sm:-top-6 sm:-right-6 w-14 sm:w-24 lg:w-25 h-14 sm:h-24 lg:h-25 bg-orange-500 rounded-full flex items-center justify-center shadow-lg sm:shadow-xl">
                 <div className="text-center text-white">
-                  <div className="text-xxs md:text-md lg:text-xl font-bold">5000+</div>
+                  <div className="text-xxs md:text-md lg:text-xl font-bold">{SITE_STATS.practiceQuestions}</div>
                   <div className="text-xxs md:text-sm">Questions</div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { SITE_STATS } from '@/lib/constants/siteStats';
 
 export default function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,7 +128,7 @@ export default function Testimonials() {
                     </svg>
                   </div>
                   <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-1 sm:mb-2">
-                    1000<span className="text-orange-200">+</span>
+                    {SITE_STATS.employeesPromotedCount}<span className="text-orange-200">+</span>
                   </div>
                   <p className="text-white/90 font-semibold text-sm sm:text-base">Railway Employees Promoted</p>
                 </div>
@@ -135,11 +136,11 @@ export default function Testimonials() {
                 {/* Stats grid */}
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-sm">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2.5 sm:p-3 border border-white/20">
-                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">85%</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{SITE_STATS.successRate}</div>
                     <p className="text-white/80 text-xs sm:text-sm leading-tight">Success Rate</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2.5 sm:p-3 border border-white/20">
-                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">7+</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{SITE_STATS.departments}</div>
                     <p className="text-white/80 text-xs sm:text-sm leading-tight">Departments</p>
                   </div>
                 </div>
