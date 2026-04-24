@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/common/Navbar';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
 import { emitExternalApiError } from '@/lib/externalApiError';
 import { apiFetch } from '@/lib/apiUtil';
+import { createClient } from '@/lib/supabase/client';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Plan {
@@ -39,6 +40,33 @@ interface ApiResponse {
   data: Plan[];
 }
 
+interface OrderResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    orderId: string;
+    amount: number;
+    currency: string;
+    status: string;
+    createdAt: string;
+    metadata: {
+      departmentId: string;
+      durationMonths: number;
+      planId: string;
+      price: number;
+      userId: string;
+    };
+  };
+}
+
+// Razorpay types
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 // ── Helper Functions ───────────────────────────────────────────────────────
 function formatAmount(value: number): string {
   return value.toLocaleString('en-IN');
@@ -67,6 +95,7 @@ function filterPlansByDepartment(plans: Plan[], departmentId: string): Plan[] {
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function SubscriptionPageClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const preselectedDept = searchParams.get('dept')?.trim() ?? '';
   const backHref = searchParams.get('from') ?? '/departments';
 
@@ -79,6 +108,7 @@ export default function SubscriptionPageClient() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeError, setSubscribeError] = useState<string | null>(null);
+  const supabase = createClient();
 
   // Fetch plans from API
   useEffect(() => {
@@ -164,7 +194,8 @@ export default function SubscriptionPageClient() {
     setSubscribeError(null);
 
     try {
-      const response = await apiFetch(API_ENDPOINTS.PAYMENT_ORDER, {
+      // Step 1: Create order
+      const response: OrderResponse = await apiFetch(API_ENDPOINTS.PAYMENT_ORDER, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,18 +205,73 @@ export default function SubscriptionPageClient() {
         }),
       });
 
-      if (response.success && response.data?.orderId) {
-        const newOrderId = response.data.orderId;
-        setOrderId(newOrderId);
-        console.log('Order ID:', newOrderId);
-        // TODO: Navigate to payment page or show payment options
-      } else {
+      if (!response.success || !response.data?.orderId) {
         throw new Error('Invalid response from server');
       }
+
+      const { orderId: razorpayOrderId, amount, currency } = response.data;
+      setOrderId(razorpayOrderId);
+      console.log('Order ID:', razorpayOrderId);
+
+      // Step 2: Get user details
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Step 3: Initialize Razorpay
+      if (!window.Razorpay) {
+        throw new Error('Razorpay SDK not loaded');
+      }
+
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        throw new Error('Razorpay key not configured');
+      }
+
+      const options = {
+        key: razorpayKey,
+        amount: amount * 100, // Razorpay expects amount in paise
+        currency: currency,
+        name: 'RailJEE',
+        description: `${selectedDepartment?.name} - ${selectedPlan.durationMonths} Month${selectedPlan.durationMonths > 1 ? 's' : ''} Subscription`,
+        order_id: razorpayOrderId,
+        prefill: {
+          name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+          email: user.email || '',
+          contact: user.user_metadata?.phone || '',
+        },
+        theme: {
+          color: '#F97316', // Orange theme
+        },
+        handler: async function (response: any) {
+          console.log('Payment successful:', response);
+          // TODO: Verify payment on backend
+          // For now, just show success and redirect
+          alert('Payment successful! Your subscription is now active.');
+          router.push('/departments');
+        },
+        modal: {
+          ondismiss: function () {
+            setSubscribing(false);
+            console.log('Payment cancelled by user');
+          },
+          escape: true,
+          backdropclose: false,
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        setSubscribeError('Payment failed. Please try again.');
+        setSubscribing(false);
+      });
+
+      razorpay.open();
     } catch (err: any) {
       console.error('Subscribe error:', err);
-      setSubscribeError('Something went wrong. Please try again.');
-    } finally {
+      setSubscribeError(err.message || 'Something went wrong. Please try again.');
       setSubscribing(false);
     }
   };
