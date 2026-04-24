@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Navbar from '@/components/home/Navbar';
 import Footer from '@/components/home/Footer';
 import { createClient } from '@/lib/supabase/server';
+import { SITE_STATS } from '@/lib/constants/siteStats';
 
 export const metadata = {
   title: "About Us | RailJee",
@@ -9,10 +10,10 @@ export const metadata = {
 };
 
 const stats = [
-  { value: '7+', label: 'Departments Covered' },
-  { value: '50+', label: 'Exam Papers' },
-  { value: '5000+', label: 'Practice Questions' },
-  { value: '2', label: 'Languages Supported' },
+  { value: SITE_STATS.departments, label: 'Departments Covered' },
+  { value: SITE_STATS.examPapers, label: 'Exam Papers' },
+  { value: SITE_STATS.practiceQuestions, label: 'Practice Questions' },
+  { value: String(SITE_STATS.languagesSupported), label: 'Languages Supported' },
 ];
 
 const features = [
