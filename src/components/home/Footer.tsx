@@ -3,11 +3,11 @@ import { FaInstagram, FaXTwitter, FaWhatsapp, FaFacebook, FaLinkedin } from 'rea
 
 export default function Footer() {
   const socialLinks = [
-    { name: 'Instagram', icon: FaInstagram, url: 'https://instagram.com', color: 'hover:text-pink-400' },
-    { name: 'X', icon: FaXTwitter, url: 'https://x.com', color: 'hover:text-gray-300' },
-    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://whatsapp.com', color: 'hover:text-green-400' },
-    { name: 'Facebook', icon: FaFacebook, url: 'https://facebook.com', color: 'hover:text-blue-400' },
-    { name: 'LinkedIn', icon: FaLinkedin, url: 'https://linkedin.com', color: 'hover:text-blue-300' },
+    { name: 'Instagram', icon: FaInstagram, url: 'https://www.instagram.com/railjee.in/', color: 'hover:text-pink-400' },
+    { name: 'X', icon: FaXTwitter, url: 'https://x.com/railjee', color: 'hover:text-gray-300' },
+    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://wa.me/918402898092', color: 'hover:text-green-400' },
+    // { name: 'Facebook', icon: FaFacebook, url: 'https://facebook.com', color: 'hover:text-blue-400' },
+    // { name: 'LinkedIn', icon: FaLinkedin, url: 'https://linkedin.com', color: 'hover:text-blue-300' },
   ];
 
   return (
@@ -58,6 +58,8 @@ export default function Footer() {
               <li><Link href="/departments/civil-engineering" className="hover:text-white transition-colors text-xs sm:text-sm">Civil</Link></li>
               <li><Link href="/departments/mechanical" className="hover:text-white transition-colors text-xs sm:text-sm">Mechanical</Link></li>
               <li><Link href="/departments/electrical" className="hover:text-white transition-colors text-xs sm:text-sm">Electrical</Link></li>
+              <li><Link href="/departments/commercial" className="hover:text-white transition-colors text-xs sm:text-sm">Commercial</Link></li>
+              <li><Link href="/departments/personnel" className="hover:text-white transition-colors text-xs sm:text-sm">Personnel</Link></li>
             </ul>
           </div>
           

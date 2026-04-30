@@ -214,10 +214,10 @@ export default function ExamCards({ papers, departments = [] }: ExamCardsProps) 
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 lg:mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-stone-900 mb-3 sm:mb-4 lg:mb-6">
-            Choose Your Exam
+            Free Mock Tests
           </h2>
           <p className="text-sm sm:text-base text-stone-600 leading-relaxed px-4">
-            Select from our top railway departmental exam papers and start your preparation journey.
+            Practice with real exam-style questions. No subscription needed.
           </p>
         </div>
 
