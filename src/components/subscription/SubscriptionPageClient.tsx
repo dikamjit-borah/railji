@@ -44,7 +44,10 @@ interface OrderResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: {
+  error?: string;
+  timestamp?: string;
+  path?: string;
+  data?: {
     orderId: string;
     amount: number;
     currency: string;
@@ -179,6 +182,13 @@ export default function SubscriptionPageClient() {
     }
   }, [availablePlans, selectedPlanId]);
 
+  // Clear error when plan changes
+  useEffect(() => {
+    if (subscribeError) {
+      setSubscribeError(null);
+    }
+  }, [selectedPlanId]);
+
   const selectedDepartment = useMemo(() => {
     return departments.find((d) => d.id === selectedDepartmentId) || null;
   }, [departments, selectedDepartmentId]);
@@ -206,7 +216,16 @@ export default function SubscriptionPageClient() {
         }),
       });
 
-      if (!response.success || !response.data?.orderId) {
+      // Handle error responses (409, 400, 500, etc.)
+      if (!response.success) {
+        setSubscribeError(
+          response.message || 'Something went wrong. Please try again.'
+        );
+        setSubscribing(false);
+        return;
+      }
+
+      if (!response.data?.orderId) {
         throw new Error('Invalid response from server');
       }
 

@@ -102,3 +102,58 @@ export async function getTopPapers(limit: number = 6): Promise<TopPaper[]> {
     return [];
   }
 }
+
+// Subscription Types
+export interface Subscription {
+  _id: string;
+  userId: string;
+  accessType: string;
+  departmentId: string;
+  planId: string;
+  paperIds: string[];
+  status: 'active' | 'expired' | 'cancelled';
+  startDate: string;
+  endDate: string;
+  paymentRef: string;
+  paymentGateway: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface SubscriptionsResponse {
+  success: boolean;
+  data: Subscription[];
+  message?: string;
+}
+
+// Fetch user subscriptions
+export async function getUserSubscriptions(accessToken: string): Promise<Subscription[]> {
+  try {
+    const response = await fetch(API_ENDPOINTS.USER_SUBSCRIPTIONS, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'accept': '*/*'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result: SubscriptionsResponse = await response.json();
+    
+    if (result.success && result.data) {
+      return result.data;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching user subscriptions:', error);
+    emitExternalApiError();
+    return [];
+  }
+}
