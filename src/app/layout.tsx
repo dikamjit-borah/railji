@@ -42,6 +42,8 @@ export default function RootLayout({
         {/* Preload above-the-fold images — browser fetches these before parsing <body> */}
         <link rel="preload" href="/images/logo.png" as="image" />
         <link rel="preload" href="/images/vande_bharat_01.avif" as="image" type="image/avif" />
+        {/* Razorpay SDK */}
+        <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
       </head>
       <body className="antialiased">
         <Suspense>

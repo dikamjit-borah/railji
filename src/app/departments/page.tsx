@@ -66,6 +66,21 @@ export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPaymentBanner, setShowPaymentBanner] = useState(false);
+
+  // Check for payment success query param
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        setShowPaymentBanner(true);
+        // Remove query param from URL
+        window.history.replaceState({}, '', '/departments');
+        // Hide banner after 10 seconds
+        setTimeout(() => setShowPaymentBanner(false), 10000);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -121,6 +136,49 @@ export default function DepartmentsPage() {
         subtitle="Choose your preparation area"
         backHref="/"
       />
+
+      {/* Payment Success Banner */}
+      {showPaymentBanner && (
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-4">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 shadow-lg flex items-start gap-3 animate-slide-down">
+            <div className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-6 h-6 text-white"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-sm sm:text-base mb-1">
+                Payment Successful!
+              </h3>
+              <p className="text-white/90 text-xs sm:text-sm">
+                Your subscription is being activated. You&apos;ll have access to premium content within a few moments.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPaymentBanner(false)}
+              className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="w-5 h-5"
+              >
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Page Title */}

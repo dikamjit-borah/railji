@@ -106,7 +106,7 @@ export default function HowItWorks() {
               Start Practicing Now
             </Link>
             <Link
-              href="/pricing"
+              href="/subscription"
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-stone-900 font-semibold rounded-full border-2 border-stone-200 hover:border-stone-300 transition-all duration-300 text-sm sm:text-base"
             >
               See Plans & Pricing

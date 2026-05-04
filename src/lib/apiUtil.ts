@@ -145,9 +145,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     throw new ApiError(response.status, 'Unauthorized');
   }
 
-  if (!response.ok) {
-    throw new ApiError(response.status, `API request failed: ${response.statusText}`);
-  }
-
+  // Return JSON response for all status codes (success or error)
+  // This allows callers to handle error responses with proper error messages
   return response.json();
 }

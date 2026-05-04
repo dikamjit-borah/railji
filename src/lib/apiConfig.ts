@@ -22,7 +22,15 @@ export const API_ENDPOINTS = {
   USER_STATS: (userId: string) => `${API_BASE_URL}/business/v1/stats/user/${userId}`,
   USER_STATS_BY_DEPT: (userId: string, deptId: string) => `${API_BASE_URL}/business/v1/stats/user/${userId}?departmentId=${deptId}`,
   USER_EXAM_ATTEMPTS: (userId: string) => `${API_BASE_URL}/business/v1/stats/user/${userId}/exams`,
-  USER_EXAM_ATTEMPTS_BY_DEPT: (userId: string, deptId: string) => `${API_BASE_URL}/business/v1/stats/user/${userId}/exams?departmentId=${deptId}`
+  USER_EXAM_ATTEMPTS_BY_DEPT: (userId: string, deptId: string) => `${API_BASE_URL}/business/v1/stats/user/${userId}/exams?departmentId=${deptId}`,
+
+  // Payment Plans API
+  PAYMENT_PLANS: `${API_BASE_URL}/business/v1/payments/plans`,
+  PAYMENT_ORDER: `${API_BASE_URL}/business/v1/payments/order`,
+  PAYMENT_VERIFY: `${API_BASE_URL}/business/v1/payments/verify`,
+  
+  // Subscriptions API
+  USER_SUBSCRIPTIONS: `${API_BASE_URL}/business/v1/payments/subscriptions`
 } as const;
 
 export default API_ENDPOINTS;
