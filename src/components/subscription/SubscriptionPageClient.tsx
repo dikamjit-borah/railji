@@ -681,7 +681,7 @@ export default function SubscriptionPageClient() {
                       )}
 
                       <div className="mt-6 pt-5 border-t border-white/10">
-                        <p className="text-[10px] font-bold tracking-wider text-stone-400 uppercase mb-3">What's included</p>
+                        <p className="text-[10px] font-bold tracking-wider text-stone-400 uppercase mb-3">What&apos;s included</p>
                         <ul className="space-y-2.5">
                           {selectedPlan.features.includesPapers && (
                             <li className="flex items-start gap-2.5 text-sm text-stone-200">
