@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
 import Navbar from '@/components/common/Navbar';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
 import { emitExternalApiError } from '@/lib/externalApiError';
-import { apiFetch } from '@/lib/apiUtil';
+import { apiFetch, ApiError } from '@/lib/apiUtil';
+import { createClient } from '@/lib/supabase/client';
 
 const LoadingScreen = dynamic(() => import('@/components/LoadingScreen'), { ssr: false });
 
@@ -63,10 +65,22 @@ function mapDepartments(raw: any[]): Department[] {
 }
 
 export default function DepartmentsPage() {
+  const router = useRouter();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPaymentBanner, setShowPaymentBanner] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
 
   // Check for payment success query param
   useEffect(() => {
@@ -94,13 +108,19 @@ export default function DepartmentsPage() {
           return;
         }
 
-        // Fetch from API on cache miss
-        const apiData = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
+        // Fetch from API on cache miss (don't require auth for department list)
+        const apiData = await apiFetch(API_ENDPOINTS.DEPARTMENTS, { requireAuth: false });
         const raw = apiData.data || [];
 
         departmentCache.set({ departments: raw });
         setDepartments(mapDepartments(raw));
       } catch (err) {
+        // Don't show error for auth issues - departments should be viewable by all
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          console.log('Viewing departments without authentication');
+          setError(null);
+          return;
+        }
         setError((err as Error).message || 'Failed to load departments');
         emitExternalApiError();
       } finally {
@@ -110,6 +130,16 @@ export default function DepartmentsPage() {
 
     fetchDepartments();
   }, []);
+
+  // Handle department card click
+  const handleDepartmentClick = (e: React.MouseEvent<HTMLAnchorElement>, deptId: string) => {
+    // If user is not authenticated, prevent navigation and redirect to signin
+    if (isAuthenticated === false) {
+      e.preventDefault();
+      router.push(`/auth/signin?redirect=/departments/${deptId}`);
+    }
+    // If authenticated, allow normal navigation (Link component handles it)
+  };
 
   if (loading) {
     return (
@@ -212,6 +242,7 @@ export default function DepartmentsPage() {
             <Link
               key={dept.id}
               href={`/departments/${dept.id}`}
+              onClick={(e) => handleDepartmentClick(e, dept.id)}
               className="bounce-card group relative overflow-hidden rounded-lg sm:rounded-2xl p-2 sm:p-4 lg:p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-95 active:opacity-50"
               style={{
                 animationDelay: `${index * 0.2}s`,

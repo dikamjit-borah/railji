@@ -29,7 +29,7 @@ const contactDetails = [
     ),
     title: 'Community & Feedback',
     value: 'WhatsApp Community',
-    href: 'https://chat.whatsapp.com/EXAMPLELINK',
+    href: 'https://chat.whatsapp.com/FZitYAl9NDrEITsBRrUu5O',
     desc: 'Interact, discuss, and prepare with fellow railway employees.',
   },
   {

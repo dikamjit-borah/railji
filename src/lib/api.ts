@@ -140,20 +140,31 @@ export async function getUserSubscriptions(accessToken: string): Promise<Subscri
       }
     });
 
+    // Handle 404 or empty response gracefully (user has no subscriptions)
+    if (response.status === 404) {
+      return [];
+    }
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Only emit error for actual server errors (5xx), not client errors
+      if (response.status >= 500) {
+        emitExternalApiError();
+      }
+      console.error(`Error fetching subscriptions: ${response.status}`);
+      return [];
     }
 
     const result: SubscriptionsResponse = await response.json();
     
     if (result.success && result.data) {
-      return result.data;
+      return Array.isArray(result.data) ? result.data : [];
     }
     
     return [];
   } catch (error) {
     console.error('Error fetching user subscriptions:', error);
-    emitExternalApiError();
+    // Don't show error modal for network issues or empty responses
+    // Only log to console
     return [];
   }
 }
