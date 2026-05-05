@@ -1,6 +1,10 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getDepartmentIcon } from '@/lib/departmentIcons';
+import { createClient } from '@/lib/supabase/client';
 
 interface Department {
   id: string;
@@ -17,6 +21,29 @@ interface DepartmentShowcaseProps {
 // Icons are defined in src/lib/departmentIcons.tsx
 
 export default function DepartmentShowcase({ departments: rawDepartments = [] }: DepartmentShowcaseProps) {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
+
+  // Handle department card click
+  const handleDepartmentClick = (e: React.MouseEvent<HTMLAnchorElement>, deptId: string) => {
+    // If user is not authenticated, prevent navigation and redirect to signin
+    if (isAuthenticated === false) {
+      e.preventDefault();
+      router.push(`/auth/signin?redirect=/departments/${deptId}`);
+    }
+    // If authenticated, allow normal navigation (Link component handles it)
+  };
+
   const departments: Department[] = rawDepartments.map((dept: any) => {
     const deptId = dept.slug || dept.id || dept.departmentId || dept.name?.toLowerCase() || '';
     return {
@@ -46,6 +73,7 @@ export default function DepartmentShowcase({ departments: rawDepartments = [] }:
             <Link
               key={dept.id}
               href={`/departments/${dept.id}`}
+              onClick={(e) => handleDepartmentClick(e, dept.id)}
               className="group relative block bg-gradient-to-br from-stone-50 to-stone-100/50 hover:from-white hover:to-stone-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 text-left border border-stone-200/50"
               style={{ animationDelay: `${index * 50}ms` }}
             >

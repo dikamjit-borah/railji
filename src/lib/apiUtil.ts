@@ -125,21 +125,27 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch(url: string, options: RequestInit = {}): Promise<any> {
+export interface ApiFetchOptions extends RequestInit {
+  requireAuth?: boolean; // If true, show toast and redirect on 401/403. If false, just throw error.
+}
+
+export async function apiFetch(url: string, options: ApiFetchOptions = {}): Promise<any> {
+  const { requireAuth = false, ...fetchOptions } = options;
   const accessToken = await getSupabaseAccessToken();
-  const headers = new Headers(options.headers || {});
+  const headers = new Headers(fetchOptions.headers || {});
 
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
 
   if (response.status === 401 || response.status === 403 || response.status === 402) {
-    if (typeof window !== 'undefined') {
+    // Only show toast and redirect if auth is explicitly required
+    if (requireAuth && typeof window !== 'undefined') {
       showAccessDeniedToast('/auth/signin');
     }
     throw new ApiError(response.status, 'Unauthorized');

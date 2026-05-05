@@ -76,7 +76,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
     // Fetch from API
     try {
-      const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
+      const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS, { requireAuth: false });
       const departments = data.data || [];
 
       // Cache for future use
@@ -122,7 +122,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
     if (departments.length === 0) {
       try {
-        const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
+        const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS, { requireAuth: false });
         departments = data.data || [];
       } catch {
         return null;
@@ -225,7 +225,7 @@ export function useExamData({ examId, deptSlug }: UseExamDataProps): UseExamData
 
         if (isGeneralPaper) {
           try {
-            const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS);
+            const data = await apiFetch(API_ENDPOINTS.DEPARTMENTS, { requireAuth: false });
             if (data.success) {
               const departments = data.data || [];
               const generalDept = departments.find((d: any) =>

@@ -44,17 +44,17 @@ export default function Hero() {
             {/* Stats */}
             <div className="mt-3 sm:mt-12 pt-2 sm:pt-8 border-t-0 sm:border-t border-stone-200">
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-8 lg:gap-12">
-                <div>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-6">{SITE_STATS.departments}</div>
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">{SITE_STATS.departments}</div>
                   <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Departments</div>
                 </div>
-                <div>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900 pl-4">{SITE_STATS.examPapers}</div>
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">{SITE_STATS.examPapers}</div>
                   <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Exam Papers</div>
                 </div>
-                <div>
+                <div className="text-center sm:text-left">
                   <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-orange-600 sm:text-stone-900">{SITE_STATS.languageDisplay}</div>
-                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1  md:pl-2">{SITE_STATS.languageNames}</div>
+                  <div className="text-stone-500 text-xs sm:text-sm mt-0.5 sm:mt-1">{SITE_STATS.languageNames}</div>
                 </div>
               </div>
             </div>

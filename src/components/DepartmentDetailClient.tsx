@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNavigation } from '@/components/NavigationProvider';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 import { departmentCache } from '@/lib/departmentCache';
@@ -25,6 +26,7 @@ interface DepartmentDetailClientProps {
 
 export default function DepartmentDetailClient({ slug }: DepartmentDetailClientProps) {
   const { isNavigating } = useNavigation();
+  const router = useRouter();
 
   // Paper type filter: 'full' (Previous Year), 'sectional', 'general'
   const [paperTypeFilter, setPaperTypeFilter] = useState<'full' | 'sectional' | 'general'>('full');
@@ -64,6 +66,21 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
   const papersContainerRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
   const PAGE_SIZE = 12;
+
+  // Check authentication and redirect if not authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // User is not authenticated, redirect to signin
+        router.push(`/auth/signin?redirect=/departments/${slug}`);
+      }
+    };
+    checkAuth();
+  }, [slug, router]);
 
   // Close sort dropdown when clicking outside
   useEffect(() => {
@@ -290,6 +307,7 @@ export default function DepartmentDetailClient({ slug }: DepartmentDetailClientP
         fetchMaterials(apiDeptId);
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
+        
         const error = err as Error;
         setError(error.message || 'Failed to load department data');
         if (!/not found/i.test(error.message || '')) {
