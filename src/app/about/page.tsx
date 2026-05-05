@@ -3,6 +3,7 @@ import Navbar from '@/components/home/Navbar';
 import Footer from '@/components/home/Footer';
 import { createClient } from '@/lib/supabase/server';
 import { SITE_STATS } from '@/lib/constants/siteStats';
+import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 export const metadata = {
   title: "About Us | RailJee",
@@ -55,11 +56,37 @@ const features = [
   },
 ];
 
-const departments = ['Civil', 'Mechanical', 'Electrical', 'Commercial', 'Personnel', 'Operating', 'S&T'];
+// Fetch departments from API
+async function getDepartments() {
+  try {
+    const response = await fetch(API_ENDPOINTS.DEPARTMENTS, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch departments');
+    }
+    
+    const data = await response.json();
+    
+    if (data.success && data.data) {
+      return data.data.map((dept: { name: string }) => dept.name);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    // Fallback to hardcoded list if API fails
+    return ['Civil', 'Mechanical', 'Electrical', 'Commercial', 'Personnel', 'Operating', 'S&T', 'Accounts', 'Medical', 'Stores', 'Engineering', 'Traffic'];
+  }
+}
 
 export default async function AboutPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  
+  // Fetch departments dynamically
+  const departments = await getDepartments();
 
   return (
     <main className="min-h-screen bg-white">
@@ -167,7 +194,7 @@ export default async function AboutPage() {
           <span className="text-xs font-semibold uppercase tracking-widest text-orange-600 mb-3 block">Departments</span>
           <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-6">Built Across Every Major Department</h2>
           <div className="flex flex-wrap justify-center gap-2">
-            {departments.map((dept) => (
+            {departments.map((dept: string) => (
               <span key={dept} className="px-4 py-2 text-sm font-medium text-stone-700 bg-[#faf9f7] border border-stone-200 rounded-full">
                 {dept}
               </span>

@@ -5,8 +5,8 @@ export default function Footer() {
   const socialLinks = [
     { name: 'Instagram', icon: FaInstagram, url: 'https://www.instagram.com/railjee.in/', color: 'hover:text-pink-400' },
     { name: 'X', icon: FaXTwitter, url: 'https://x.com/railjee', color: 'hover:text-gray-300' },
-    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://wa.me/918402898092', color: 'hover:text-green-400' },
-    // { name: 'Facebook', icon: FaFacebook, url: 'https://facebook.com', color: 'hover:text-blue-400' },
+    { name: 'WhatsApp', icon: FaWhatsapp, url: 'https://chat.whatsapp.com/FZitYAl9NDrEITsBRrUu5O', color: 'hover:text-green-400' },
+    { name: 'Facebook', icon: FaFacebook, url: 'https://www.facebook.com/railjee.in', color: 'hover:text-blue-400' },
     // { name: 'LinkedIn', icon: FaLinkedin, url: 'https://linkedin.com', color: 'hover:text-blue-300' },
   ];
 

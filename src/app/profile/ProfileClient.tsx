@@ -49,10 +49,15 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         
         if (session?.access_token) {
           const subs = await getUserSubscriptions(session.access_token);
-          setSubscriptions(subs);
+          // Ensure we always set an array, even if API returns null/undefined
+          setSubscriptions(Array.isArray(subs) ? subs : []);
+        } else {
+          setSubscriptions([]);
         }
       } catch (error) {
         console.error('Error loading subscriptions:', error);
+        // Set empty array on error to prevent crashes
+        setSubscriptions([]);
       } finally {
         setLoadingSubscriptions(false);
       }

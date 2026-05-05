@@ -201,6 +201,15 @@ export default function SubscriptionPageClient() {
   const handleSubscribe = async () => {
     if (!selectedPlan) return;
 
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // Redirect to signin with return URL
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/auth/signin?redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
     setSubscribing(true);
     setSubscribeError(null);
 
@@ -233,13 +242,7 @@ export default function SubscriptionPageClient() {
       setOrderId(razorpayOrderId);
       console.log('Order ID:', razorpayOrderId);
 
-      // Step 2: Get user details
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Step 3: Initialize Razorpay
+      // Step 2: Initialize Razorpay
       if (!window.Razorpay) {
         throw new Error('Razorpay SDK not loaded');
       }

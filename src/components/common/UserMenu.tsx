@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { departmentCache } from '@/lib/departmentCache'
 
 interface NavItem {
   name: string
@@ -25,9 +23,7 @@ interface UserMenuProps {
 
 export default function UserMenu({ user, navItems }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const supabase = createClient()
 
   const fullName =
     user.user_metadata?.name ||
@@ -40,7 +36,7 @@ export default function UserMenu({ user, navItems }: UserMenuProps) {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        if (!signingOut) setIsOpen(false)
+        setIsOpen(false)
       }
     }
 
@@ -48,14 +44,7 @@ export default function UserMenu({ user, navItems }: UserMenuProps) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen, signingOut])
-
-  async function handleSignOut() {
-    setSigningOut(true)
-    await supabase.auth.signOut()
-    departmentCache.clear()
-    window.location.href = '/'
-  }
+  }, [isOpen])
 
   return (
     <div className="relative" ref={menuRef}>
@@ -80,7 +69,9 @@ export default function UserMenu({ user, navItems }: UserMenuProps) {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 py-2 z-50">
           <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {user.user_metadata?.name || user.user_metadata?.full_name || user.email}
+            </p>
           </div>
 
           {/* Mobile-only nav links */}
@@ -132,27 +123,6 @@ export default function UserMenu({ user, navItems }: UserMenuProps) {
               </svg>
               My Statistics
             </Link>
-
-          </div>
-
-          <div className="border-t border-gray-100 mt-1 pt-1">
-            <button
-              onClick={handleSignOut}
-              disabled={signingOut}
-              className="flex items-center gap-2 sm:gap-3 w-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-orange-600 hover:bg-orange-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {signingOut ? (
-                <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              )}
-              {signingOut ? 'Signing out...' : 'Sign Out'}
-            </button>
           </div>
         </div>
       )}
